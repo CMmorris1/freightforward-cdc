@@ -37,3 +37,5 @@ models:
 seeds:
   freight_analytics:
     +schema: public
+    # Prevents dbt from appending 'marts_' to the front
+    +alias: fct_shipment_tracking
