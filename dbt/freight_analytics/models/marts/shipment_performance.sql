@@ -16,8 +16,8 @@ with raw_data as (
 --     group by 1
 -- )
 
-select
-    *,
-    -- Calculate Lead Time in hours
-    extract(epoch from (delivered_at - booked_at)) / 3600 as lead_time_hours
-from shipment_lifecycles
+-- select
+--     *,
+--     -- Calculate Lead Time in hours
+--     extract(epoch from (delivered_at - booked_at)) / 3600 as lead_time_hours
+-- from shipment_lifecycles
