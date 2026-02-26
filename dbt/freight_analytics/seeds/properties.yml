@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: raw_freight
     database: analytics
-    schema: public
+    # schema: public
     tables:
       - name: fct_shipment_tracking
         columns:
