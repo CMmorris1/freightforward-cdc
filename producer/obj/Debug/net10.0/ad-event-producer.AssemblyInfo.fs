@@ -10,7 +10,7 @@ open System.Reflection
 [<assembly: System.Reflection.AssemblyCompanyAttribute("ad-event-producer")>]
 [<assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")>]
 [<assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")>]
-[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")>]
+[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d542f2e75379a94309a795e06fd1494069c6dff0")>]
 [<assembly: System.Reflection.AssemblyProductAttribute("ad-event-producer")>]
 [<assembly: System.Reflection.AssemblyTitleAttribute("ad-event-producer")>]
 [<assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")>]

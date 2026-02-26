@@ -52,3 +52,4 @@
 /Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/producer/obj/Debug/net10.0/ad-event-producer.pdb
 /Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/producer/obj/Debug/net10.0/ad-event-producer.genruntimeconfig.cache
 /Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/producer/obj/Debug/net10.0/ref/ad-event-producer.dll
+/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/producer/obj/Debug/net10.0/ad-event-producer.sourcelink.json
