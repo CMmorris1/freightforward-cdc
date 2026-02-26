@@ -13,7 +13,7 @@ jobs:
     # Senior Move: Spin up a real DB container for the test
     services:
       postgres:
-        image: postgres:15
+        image: postgres:17
         env:
           POSTGRES_USER: de_user
           POSTGRES_PASSWORD: ${{ secrets.DBT_ENV_SECRET_DB_PASSWORD }}
