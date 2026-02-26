@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: raw_freight
+    database: analytics
+    schema: public  # This is where Spark is writing
+    tables:
+      - name: fct_shipment_tracking
+        description: "Raw streaming shipment updates from Spark/Redpanda"
+        columns:
+          - name: shipment_id
+            tests:
+              - not_null
+          - name: last_update
+            description: "The event time captured from the stream"

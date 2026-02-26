@@ -1,0 +1,162 @@
+[0m19:30:35.982891 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1060ea110>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106151350>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106181a10>]}
+
+
+============================== 19:30:35.985607 | b21c9a79-8e36-4e44-9510-e33a369b7566 ==============================
+[0m19:30:35.985607 [info ] [MainThread]: Running with dbt=1.11.6
+[0m19:30:35.985963 [debug] [MainThread]: running dbt with arguments {'log_path': 'logs', 'invocation_command': 'dbt init freight_analytics', 'introspect': 'True', 'fail_fast': 'False', 'warn_error': 'None', 'quiet': 'False', 'partial_parse': 'True', 'log_format': 'default', 'write_json': 'True', 'send_anonymous_usage_stats': 'True', 'debug': 'False', 'indirect_selection': 'eager', 'no_print': 'None', 'version_check': 'True', 'use_experimental_parser': 'False', 'printer_width': '80', 'log_cache_events': 'False', 'empty': 'None', 'profiles_dir': '/Users/ChrisProjects/.dbt', 'static_parser': 'True', 'target_path': 'None', 'cache_selected_only': 'False', 'use_colors': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])'}
+[0m19:30:35.997801 [info ] [MainThread]: Creating dbt configuration folder at /Users/ChrisProjects/.dbt
+[0m19:30:35.998874 [debug] [MainThread]: Starter project path: /Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/lib/python3.11/site-packages/dbt/include/starter_project
+[0m19:30:36.004409 [info ] [MainThread]: 
+Your new dbt project "freight_analytics" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m19:30:36.004751 [info ] [MainThread]: Setting up your profile.
+[0m19:32:02.830984 [error] [MainThread]: Encountered an error:
+
+[0m19:32:02.842876 [error] [MainThread]: Traceback (most recent call last):
+  File "/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/lib/python3.11/site-packages/dbt/cli/requires.py", line 182, in wrapper
+    result, success = func(*args, **kwargs)
+                      ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/lib/python3.11/site-packages/dbt/cli/requires.py", line 128, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/lib/python3.11/site-packages/dbt/cli/main.py", line 483, in init
+    results = task.run()
+              ^^^^^^^^^^
+  File "/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/lib/python3.11/site-packages/dbt/task/init.py", line 346, in run
+    self.setup_profile(profile_name)
+  File "/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/lib/python3.11/site-packages/dbt/task/init.py", line 262, in setup_profile
+    self.create_profile_from_target(adapter, profile_name=profile_name)
+  File "/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/lib/python3.11/site-packages/dbt/task/init.py", line 179, in create_profile_from_target
+    self.create_profile_from_profile_template(profile_template, profile_name)
+  File "/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/lib/python3.11/site-packages/dbt/task/init.py", line 163, in create_profile_from_profile_template
+    target = self.generate_target_from_input(prompts, initial_target)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/lib/python3.11/site-packages/dbt/task/init.py", line 129, in generate_target_from_input
+    target[key] = click.prompt(
+                  ^^^^^^^^^^^^^
+  File "/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/lib/python3.11/site-packages/click/termui.py", line 171, in prompt
+    value = prompt_func(prompt)
+            ^^^^^^^^^^^^^^^^^^^
+  File "/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/lib/python3.11/site-packages/click/termui.py", line 154, in prompt_func
+    raise Abort() from None
+click.exceptions.Abort
+
+[0m19:32:03.181712 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": false, "command_wall_clock_time": 87.23986, "process_in_blocks": "0", "process_kernel_time": 0.265737, "process_mem_max_rss": "109051904", "process_out_blocks": "0", "process_user_time": 0.900598}
+[0m19:32:03.183646 [debug] [MainThread]: Command `dbt init` failed at 19:32:03.183282 after 87.24 seconds
+[0m19:32:03.185334 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10611c810>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106152bd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1061515d0>]}
+[0m19:32:03.186568 [debug] [MainThread]: Flushing usage events
+[0m19:32:03.672656 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m19:32:06.912106 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1079b5b10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1079b5350>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1079e5b90>]}
+
+
+============================== 19:32:06.915003 | a2ca5eee-f4f1-4b74-8a43-10fd01f883bc ==============================
+[0m19:32:06.915003 [info ] [MainThread]: Running with dbt=1.11.6
+[0m19:32:06.915361 [debug] [MainThread]: running dbt with arguments {'use_colors': 'True', 'cache_selected_only': 'False', 'indirect_selection': 'eager', 'version_check': 'True', 'fail_fast': 'False', 'use_experimental_parser': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'warn_error': 'None', 'write_json': 'True', 'partial_parse': 'True', 'static_parser': 'True', 'printer_width': '80', 'empty': 'None', 'profiles_dir': '/Users/ChrisProjects/.dbt', 'no_print': 'None', 'target_path': 'None', 'log_cache_events': 'False', 'invocation_command': 'dbt init freight_analytics', 'quiet': 'False', 'log_format': 'default', 'debug': 'False', 'introspect': 'True', 'send_anonymous_usage_stats': 'True', 'log_path': 'logs'}
+[0m19:32:06.927514 [info ] [MainThread]: A project called freight_analytics already exists here.
+[0m19:32:06.928990 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 0.060113043, "process_in_blocks": "0", "process_kernel_time": 0.152015, "process_mem_max_rss": "108691456", "process_out_blocks": "0", "process_user_time": 0.655216}
+[0m19:32:06.929266 [debug] [MainThread]: Command `dbt init` succeeded at 19:32:06.929209 after 0.06 seconds
+[0m19:32:06.929476 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10794d4d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x105427e50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1076147d0>]}
+[0m19:32:06.929674 [debug] [MainThread]: Flushing usage events
+[0m19:32:07.249095 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m19:33:23.899127 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x118c53cd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x118c80150>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x118c81710>]}
+
+
+============================== 19:33:23.903064 | d7b10d86-2d5e-4735-9819-65b08c258c10 ==============================
+[0m19:33:23.903064 [info ] [MainThread]: Running with dbt=1.11.6
+[0m19:33:23.903807 [debug] [MainThread]: running dbt with arguments {'warn_error': 'None', 'invocation_command': 'dbt init freight_analytics', 'profiles_dir': '/Users/ChrisProjects/.dbt', 'use_experimental_parser': 'False', 'printer_width': '80', 'introspect': 'True', 'log_format': 'default', 'use_colors': 'True', 'static_parser': 'True', 'indirect_selection': 'eager', 'no_print': 'None', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'debug': 'False', 'log_cache_events': 'False', 'log_path': 'logs', 'fail_fast': 'False', 'cache_selected_only': 'False', 'write_json': 'True', 'quiet': 'False', 'empty': 'None', 'send_anonymous_usage_stats': 'True', 'partial_parse': 'True', 'version_check': 'True'}
+[0m19:33:23.917931 [debug] [MainThread]: Starter project path: /Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/lib/python3.11/site-packages/dbt/include/starter_project
+[0m19:33:23.923253 [info ] [MainThread]: 
+Your new dbt project "freight_analytics" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m19:33:23.923456 [info ] [MainThread]: Setting up your profile.
+[0m19:41:16.668769 [info ] [MainThread]: Profile freight_analytics written to /Users/ChrisProjects/.dbt/profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m19:41:16.694672 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 472.85065, "process_in_blocks": "0", "process_kernel_time": 0.212965, "process_mem_max_rss": "105791488", "process_out_blocks": "0", "process_user_time": 0.707568}
+[0m19:41:16.695889 [debug] [MainThread]: Command `dbt init` succeeded at 19:41:16.695714 after 472.85 seconds
+[0m19:41:16.696739 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x103054e50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x103054f50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x103054f90>]}
+[0m19:41:16.697749 [debug] [MainThread]: Flushing usage events
+[0m19:41:17.119644 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m19:43:10.424411 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1079ea4d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x107a51b90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x107a70fd0>]}
+
+
+============================== 19:43:10.427392 | 2fadff28-9293-4838-ae6a-3285d78afe4e ==============================
+[0m19:43:10.427392 [info ] [MainThread]: Running with dbt=1.11.6
+[0m19:43:10.427771 [debug] [MainThread]: running dbt with arguments {'debug': 'False', 'write_json': 'True', 'version_check': 'True', 'log_format': 'default', 'static_parser': 'True', 'warn_error': 'None', 'printer_width': '80', 'log_cache_events': 'False', 'use_experimental_parser': 'False', 'indirect_selection': 'eager', 'send_anonymous_usage_stats': 'True', 'no_print': 'None', 'empty': 'None', 'use_colors': 'True', 'introspect': 'True', 'profiles_dir': '/Users/ChrisProjects/.dbt', 'partial_parse': 'True', 'invocation_command': 'dbt debug', 'log_path': 'logs', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'cache_selected_only': 'False', 'quiet': 'False', 'target_path': 'None', 'fail_fast': 'False'}
+[0m19:43:10.458089 [info ] [MainThread]: dbt version: 1.11.6
+[0m19:43:10.459055 [info ] [MainThread]: python version: 3.11.0
+[0m19:43:10.459258 [info ] [MainThread]: python path: /Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/.venv/bin/python3.11
+[0m19:43:10.459651 [info ] [MainThread]: os info: macOS-26.3-arm64-arm-64bit
+[0m19:43:10.550147 [info ] [MainThread]: Using profiles dir at /Users/ChrisProjects/.dbt
+[0m19:43:10.550420 [info ] [MainThread]: Using profiles.yml file at /Users/ChrisProjects/.dbt/profiles.yml
+[0m19:43:10.550569 [info ] [MainThread]: Using dbt_project.yml file at /Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/dbt/dbt_project.yml
+[0m19:43:10.550930 [info ] [MainThread]: adapter type: postgres
+[0m19:43:10.551106 [info ] [MainThread]: adapter version: 1.10.0
+[0m19:43:10.551254 [info ] [MainThread]: Configuration:
+[0m19:43:10.551393 [info ] [MainThread]:   profiles.yml file [[32mOK found and valid[0m]
+[0m19:43:10.551533 [info ] [MainThread]:   dbt_project.yml file [[31mERROR not found[0m]
+[0m19:43:10.551655 [info ] [MainThread]: Required dependencies:
+[0m19:43:10.551816 [debug] [MainThread]: Executing "git --help"
+[0m19:43:10.585544 [debug] [MainThread]: STDOUT: "b"usage: git [--version] [--help] [-C <path>] [-c name=value]\n           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n           [-p | --paginate | --no-pager] [--no-replace-objects] [--bare]\n           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]\n           <command> [<args>]\n\nThese are common Git commands used in various situations:\n\nstart a working area (see also: git help tutorial)\n   clone      Clone a repository into a new directory\n   init       Create an empty Git repository or reinitialize an existing one\n\nwork on the current change (see also: git help everyday)\n   add        Add file contents to the index\n   mv         Move or rename a file, a directory, or a symlink\n   reset      Reset current HEAD to the specified state\n   rm         Remove files from the working tree and from the index\n\nexamine the history and state (see also: git help revisions)\n   bisect     Use binary search to find the commit that introduced a bug\n   grep       Print lines matching a pattern\n   log        Show commit logs\n   show       Show various types of objects\n   status     Show the working tree status\n\ngrow, mark and tweak your common history\n   branch     List, create, or delete branches\n   checkout   Switch branches or restore working tree files\n   commit     Record changes to the repository\n   diff       Show changes between commits, commit and working tree, etc\n   merge      Join two or more development histories together\n   rebase     Forward-port local commits to the updated upstream head\n   tag        Create, list, delete or verify a tag object signed with GPG\n\ncollaborate (see also: git help workflows)\n   fetch      Download objects and refs from another repository\n   pull       Fetch from and integrate with another repository or a local branch\n   push       Update remote refs along with associated objects\n\n'git help -a' and 'git help -g' list available subcommands and some\nconcept guides. See 'git help <command>' or 'git help <concept>'\nto read about a specific subcommand or concept.\n""
+[0m19:43:10.586109 [debug] [MainThread]: STDERR: "b''"
+[0m19:43:10.586299 [info ] [MainThread]:  - git [[32mOK found[0m]
+
+[0m19:43:10.586479 [info ] [MainThread]: Connection:
+[0m19:43:10.586649 [info ] [MainThread]:   host: 127.0.0.1
+[0m19:43:10.586778 [info ] [MainThread]:   port: 5433
+[0m19:43:10.586896 [info ] [MainThread]:   user: de_user
+[0m19:43:10.587016 [info ] [MainThread]:   database: analytics
+[0m19:43:10.587133 [info ] [MainThread]:   schema: marts
+[0m19:43:10.587249 [info ] [MainThread]:   connect_timeout: 10
+[0m19:43:10.587368 [info ] [MainThread]:   role: None
+[0m19:43:10.587483 [info ] [MainThread]:   search_path: None
+[0m19:43:10.587597 [info ] [MainThread]:   keepalives_idle: 0
+[0m19:43:10.587717 [info ] [MainThread]:   sslmode: None
+[0m19:43:10.587829 [info ] [MainThread]:   sslcert: None
+[0m19:43:10.587938 [info ] [MainThread]:   sslkey: None
+[0m19:43:10.588059 [info ] [MainThread]:   sslrootcert: None
+[0m19:43:10.588174 [info ] [MainThread]:   application_name: dbt
+[0m19:43:10.588284 [info ] [MainThread]:   retries: 1
+[0m19:43:10.588606 [info ] [MainThread]: Registered adapter: postgres=1.10.0
+[0m19:43:11.524201 [debug] [MainThread]: Acquiring new postgres connection 'debug'
+[0m19:43:11.554024 [debug] [MainThread]: Using postgres connection "debug"
+[0m19:43:11.554232 [debug] [MainThread]: On debug: select 1 as id
+[0m19:43:11.554376 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m19:43:11.830897 [debug] [MainThread]: SQL status: SELECT 1 in 0.276 seconds
+[0m19:43:11.832069 [debug] [MainThread]: On debug: Close
+[0m19:43:11.832449 [info ] [MainThread]:   Connection test: [[32mOK connection ok[0m]
+
+[0m19:43:11.833075 [info ] [MainThread]: [31m1 check failed:[0m
+[0m19:43:11.833450 [info ] [MainThread]: Project loading failed for the following reason:
+ project path </Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward/dbt/dbt_project.yml> not found
+
+[0m19:43:11.837627 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 1.4533162, "process_in_blocks": "0", "process_kernel_time": 0.275455, "process_mem_max_rss": "117686272", "process_out_blocks": "0", "process_user_time": 0.761296}
+[0m19:43:11.838211 [debug] [MainThread]: Command `dbt debug` failed at 19:43:11.838116 after 1.45 seconds
+[0m19:43:11.838546 [debug] [MainThread]: Connection 'debug' was properly closed.
+[0m19:43:11.838883 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x107696a50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x107a5c810>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10226cdd0>]}
+[0m19:43:11.839574 [debug] [MainThread]: Flushing usage events
+[0m19:43:12.252532 [debug] [MainThread]: An error was encountered while trying to flush usage events

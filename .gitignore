@@ -1,0 +1,9 @@
+# Add this to .gitignore
+.venv/
+__pycache__/
+*.pyc
+.terraform/
+terraform.tfstate*
+spark/checkpoints/
+Explaination.txt
+output.txt
