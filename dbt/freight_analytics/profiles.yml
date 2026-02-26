@@ -1,12 +1,15 @@
+# dbt/freight_analytics/profiles.yml
 freight_analytics:
   outputs:
     dev:
       type: postgres
-      host: ${{ env_var('DBT_HOST', '127.0.0.1') }} # Defaults to local, but CI can override
+      host: "{{ env_var('DBT_HOST', '127.0.0.1') }}"
       user: de_user
       password: "{{ env_var('DBT_ENV_SECRET_DB_PASSWORD') }}"
-      port: ${{ env_var('DBT_PORT', 5433) | as_number }}
+      # Fixed: Quoting the entire Jinja expression prevents the YAML parser error
+      port: "{{ env_var('DBT_PORT', '5433') | as_number }}"
       dbname: analytics
       schema: marts
       threads: 4
   target: dev
+
