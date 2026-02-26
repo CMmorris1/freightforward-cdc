@@ -1,0 +1,48 @@
+name: dbt_ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  dbt_test:
+    runs-on: ubuntu-latest
+
+    # Senior Move: Spin up a real DB container for the test
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: de_user
+          POSTGRES_PASSWORD: ${{ secrets.DBT_ENV_SECRET_DB_PASSWORD }}
+          POSTGRES_DB: analytics
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dbt
+        run: |
+          pip install dbt-postgres
+
+      - name: dbt Debug & Build
+        env:
+          # Match your dbt profiles.yml variables
+          DBT_ENV_SECRET_DB_PASSWORD: ${{ secrets.DBT_ENV_SECRET_DB_PASSWORD }}
+        run: |
+          cd dbt/freight_analytics
+          # We use 'build' because it runs both 'run' and 'test'
+          dbt build --target dev --profiles-dir . 
