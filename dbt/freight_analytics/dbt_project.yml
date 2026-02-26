@@ -37,5 +37,3 @@ models:
 seeds:
   freight_analytics:
     +schema: public
-    # This tells dbt: "Don't prefix it, just call it public"
-    +alias: fct_shipment_tracking 
