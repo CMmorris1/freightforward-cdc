@@ -44,7 +44,7 @@ jobs:
           DBT_ENV_SECRET_DB_PASSWORD: ${{ secrets.DBT_ENV_SECRET_DB_PASSWORD }}
           # OVERRIDE FOR CI ENVIRONMENT:
           DBT_PORT: 5432  # GitHub Service Containers use the internal port
-          DBT_HOST: postgres # GitHub uses the service name as the hostname
+          DBT_HOST: localhost # GitHub uses the service name as the hostname
         run: |
           cd dbt/freight_analytics
           # We use 'build' because it runs both 'run' and 'test'
