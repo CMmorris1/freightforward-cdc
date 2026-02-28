@@ -7,3 +7,4 @@ terraform.tfstate*
 spark/checkpoints/
 Explaination.txt
 output.txt
+Dockerhelp.txt.rtf
