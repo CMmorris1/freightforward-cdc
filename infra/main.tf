@@ -1,134 +1,118 @@
 terraform {
   required_providers {
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = "~> 3.6.2"
-    }
-    kafka-connect = {
-      source  = "Mongey/kafka-connect"
-      version = "0.3.0"
-    }
+    docker = { source = "kreuzwerker/docker", version = "~> 3.0.2" }
+    kafka-connect = { source = "Mongey/kafka-connect", version = "0.4.3" }
   }
 }
 
-provider "docker" {}
-
-# --- NETWORK ---
-resource "docker_network" "data_network" {
-  name = "freight_network"
+provider "docker" {
+  # If you are on Mac, leaving this blank lets it use the default socket.
+  # If you must be explicit:
+  host = "unix:///var/run/docker.sock"
 }
 
+# 1. Define the Private Network
+resource "docker_network" "kafka_net" {
+  name = "redpanda_network"
+}
 
-# 1. --- POSTGRES (with logical replication) ---
+# --- REDPANDA (Streaming) ---
+resource "docker_image" "redpanda" {
+  name         = "docker.redpanda.com/redpandadata/redpanda:latest"
+  keep_locally = true
+}
+
+# 2. Redpanda Broker
+resource "docker_container" "redpanda" {
+  name  = "redpanda"
+  image = docker_image.redpanda.name
+  command = ["redpanda", "start", "--overprovisioned", "--kafka-addr", "0.0.0.0:9092", "--advertise-kafka-addr", "redpanda:9092", "--smp", "1", "--memory", "1G", "--reserve-memory", "0M", "--node-id", "0", "--check=false"]
+  #command = ["redpanda", "start", "--overprovisioned"]
+  networks_advanced { name = docker_network.kafka_net.name }
+  ports { 
+    internal = 9092 
+    external = 9092 
+  }
+}
+
+# 3. Postgres with CDC enabled
 resource "docker_container" "postgres" {
-  name  = "postgres"
-  image = "postgres:17"
-  networks_advanced { name = docker_network.data_network.name }
-  
-  env = [
-    "POSTGRES_USER=de_user",
-    "POSTGRES_PASSWORD=de_password",
-    "POSTGRES_DB=freightjobs"
-  ]
-
-  # Enable Logical Replication for Debezium
-  command = ["postgres","-c","wal_level=logical"]
-
-  ports {
+  name    = "postgres"
+  image   = "postgres:17"
+  command = ["postgres", "-c", "wal_level=logical"]
+  env     = ["POSTGRES_USER=de_user", "POSTGRES_PASSWORD=de_password", "POSTGRES_DB=freightjobs"]
+  networks_advanced { name = docker_network.kafka_net.name }
+  ports { 
     internal = 5432
     external = 5433
   }
 }
 
-# 2. --- Kafka (using Confluent 7.0 for Kafka 3.0 compatibility) --- 
-resource "docker_container" "zookeeper" {
-  name  = "zookeeper"
-  image = "confluentinc/cp-zookeeper:7.0.0"
-  networks_advanced { name = docker_network.data_network.name }
-  env = ["ZOOKEEPER_CLIENT_PORT=2181", "ZOOKEEPER_TICK_TIME=2000"]
-}
-
-resource "docker_container" "kafka" {
-  name  = "kafka"
-  image = "confluentinc/cp-kafka:7.0.0"
-  networks_advanced { name = docker_network.data_network.name }
-  depends_on = [docker_container.zookeeper]
-  env = [
-    "KAFKA_BROKER_ID=1",
-    "KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181",
-    "KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092",
-    "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT",
-    "KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT",
-    "KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1"
-  ]
-  ports { 
-    internal = 29092 
-    external = 29092 
-  }
-}
-
-# 3. --- Debezium Connect Container --- 
+# 4. Debezium (Kafka Connect)
 resource "docker_container" "debezium" {
   name  = "debezium"
-  image = "debezium/connect:2.5" # Latest stable Debezium
-  networks_advanced { name = docker_network.data_network.name }
-  depends_on = [docker_container.kafka]
+  image = "quay.io/debezium/connect:2.7.0.Final"
   env = [
-    "BOOTSTRAP_SERVERS=kafka:9092",
+    "BOOTSTRAP_SERVERS=redpanda:9092",
     "GROUP_ID=1",
-    "CONFIG_STORAGE_TOPIC=my_connect_configs",
-    "OFFSET_STORAGE_TOPIC=my_connect_offsets",
-    "STATUS_STORAGE_TOPIC=my_connect_statuses",
-    "KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter",
-    "VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter",
-    "CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE=false",
-    "CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE=false"
+    "CONFIG_STORAGE_TOPIC=my_configs",
+    "OFFSET_STORAGE_TOPIC=my_offsets",
+    "STATUS_STORAGE_TOPIC=my_status"
   ]
+  # This checks if the /connectors endpoint is actually reachable
+  healthcheck {
+    test     = ["CMD", "curl", "-f", "http://localhost:8083/connectors"]
+    interval = "10s"
+    retries  = 20
+    timeout  = "5s"
+  }
+  networks_advanced { name = docker_network.kafka_net.name }
   ports { 
-    internal = 8083
+    internal = 8083 
     external = 8083 
+  }
+  depends_on = [docker_container.redpanda]
+}
+
+# 5. Redpanda Console (Web UI)
+resource "docker_container" "console" {
+  name  = "redpanda-console"
+  image = docker_image.redpanda.name
+  env = [
+    "KAFKA_BROKERS=redpanda:9092",
+    "KAFKA_CONNECT_ENABLED=true",
+    "KAFKA_CONNECT_CLUSTERS_0_NAME=debezium",
+    "KAFKA_CONNECT_CLUSTERS_0_URL=http://connect:8083"
+  ]
+  networks_advanced { name = docker_network.kafka_net.name }
+  ports { 
+    internal = 8080
+    external = 8080 
   }
 }
 
-
-# 4. --- Materialize Container ---
-#resource "docker_container" "materialize" {
-#  name  = "materialize"
-#  image = "materialize/materialized:latest"
-#  networks_advanced { name = docker_network.data_network.name }
-#  ports { internal = 6875; external = 6875 }
-#}
-
-# 5. --- Debezium PostgreSQL Connector Configuration ---
-provider "kafka-connect" {
-  url = "http://localhost:8083"
+# 6. Wait for the API to boot up
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "90s"
+  depends_on      = [docker_container.debezium]
 }
 
-resource "time_sleep" "wait_for_debezium" {
-  depends_on = [docker_container.debezium] # Or whoever runs Kafka Connect
 
-  create_duration = "60s" # Adjust based on how long Debezium takes to boot
-}
+# 7. Configure the Postgres Connector
+provider "kafka-connect" { url = "http://localhost:8083" }
 
-locals {
-  connector_name = "postgres-connector"
-}
-
-resource "kafka-connect_connector" "postgres_source" {
-  name = "postgres-connector" 
-  
+resource "kafka-connect_connector" "postgres-cdc"{
+  name = "postgres-cdc"
   config = {
-    "name"              = "postgres-connector" 
+    "name"              = "postgres-cdc"
     "connector.class"   = "io.debezium.connector.postgresql.PostgresConnector"
     "database.hostname" = "postgres"
     "database.port"     = "5432"
     "database.user"     = "de_user"
     "database.password" = "de_password"
     "database.dbname"   = "freightjobs"
-    "topic.prefix"      = "dbserver1"
+    "topic.prefix"      = "db"
     "plugin.name"       = "pgoutput"
   }
-
-  # Ensure we wait for the sleep timer, not just the container start
-  depends_on = [time_sleep.wait_for_debezium, docker_container.postgres]
+  depends_on = [time_sleep.wait_60_seconds]
 }

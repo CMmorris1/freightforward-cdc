@@ -1,64 +1,48 @@
 services:
-  # --- STREAMING: Redpanda (Kafka compatible) ---
-  redpanda:
-    image: docker.redpanda.com/redpandadata/redpanda:latest
-    container_name: redpanda
-    command:
-      - redpanda start
-      - --overprovisioned
-      - --smp 1 # Limits to 1 CPU core for the Air's thermal management
-      - --memory 1G 
-      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
-      - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
-    ports:
-      - "19092:19092"
-      - "9092:9092"
-    healthcheck:
-      test: ["CMD", "rpk", "cluster", "info"]
-      interval: 5s
-      timeout: 10s
-      retries: 5
 
   # --- DATABASE: PostgreSQL (The 'Warehouse') ---
   postgres:
-    image: postgres:15-alpine
+    image: postgres:17
     container_name: postgres
     environment:
       POSTGRES_USER: de_user
       POSTGRES_PASSWORD: de_password
-      POSTGRES_DB: analytics
+      POSTGRES_DB: freightjobs
+    command: ["postgres", "-c", "wal_level=logical"]
     ports:
-      - "5433:5433"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # --- PROCESSING: Official Apache Spark (M1 Native) ---
-  spark:
-    image: apache/spark:latest
-    container_name: spark-master
-    user: root  # Required for some permission-sensitive Spark scripts
-    environment:
-      - SPARK_MODE=master
-      - SPARK_RPC_AUTHENTICATION_ENABLED=no
-      - SPARK_NO_DAEMONIZE=true
+  zookeeper:
+    image: quay.io/debezium/zookeeper:2.7
     ports:
-      - "8080:8080"
-      - "7077:7077"
-    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
-
-  spark-worker:
-    image: apache/spark:latest
-    container_name: spark-worker
-    user: root
-    environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark:7077
-      - SPARK_WORKER_MEMORY=2G
-      - SPARK_WORKER_CORES=2
-      - SPARK_NO_DAEMONIZE=true
+      - 2181:2181
+  
+  kafka:
+    image: quay.io/debezium/kafka:2.7
+    ports:
+      - 9092:9092
     depends_on:
-      - spark
-    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark:7077
-    
+      - zookeeper
+    environment:
+      - ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      
+  # This is the core Debezium engine
+  connect:
+    image: quay.io/debezium/connect:3.0
+    ports:
+      - 8083:8083
+    depends_on:
+      - kafka
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_connect_statuses
+      - CONNECT_TOPIC_CREATION_ENABLE=true 
+
 volumes:
   postgres_data:
