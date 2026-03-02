@@ -12,8 +12,10 @@ up: ## 1. Spin up Infrastructure (Terraform)
 	cd infra && terraform apply -auto-approve
 	@echo "⏳ Waiting for Postgres..."
 	@until nc -z 127.0.0.1 5433; do sleep 1; done
+	@docker exec -it postgres psql -U de_user -d freightjobs -c "CREATE TABLE IF NOT EXISTS fct_shipment_tracking (shipment_id TEXT, last_update TIMESTAMP, current_status TEXT);"
+
+materialize:
 	@psql -U materialize -h localhost -p 6875 -d materialize -f init_materialize.sql
-# 	@docker exec -it postgres psql -U de_user -d freightjobs -c "CREATE TABLE IF NOT EXISTS fct_shipment_tracking (shipment_id TEXT, last_update TIMESTAMP, current_status TEXT);"
 
 producer: ## 2. Start python Event Producer
 	cd producer && python3 simulateFreight.py
