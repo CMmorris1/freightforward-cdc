@@ -25,4 +25,8 @@ Or
 2. `cd producer && source .venv/bin/activate && python3 simulateFreight.py`
 4. `cd infra && psql -U materialize -h localhost -p 6875 -d materialize -f init_materialize.sql`
 
+## To consume the Respanda topics. This fule is currently configured to read the freight_jobs topic
+## it can be modified by uncommenting other topics and replacing the desired topic in line 32
+5. `cd producer && python3 consumeRedpandaTopics.py` 
+
 
