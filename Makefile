@@ -20,15 +20,12 @@ producer: ## 2. Start python Event Producer
 	python3 simulateFreight.py
 
 materialize:
-#	Create materialize container and connect it to the terraform redpanda network
-	@docker run -d --name materialize --network redpanda_network -p 6875:6875 materialize/materialized:latest
+	cd infra &&
 #	Initialize Materialize and create database sources, views, and sinks to publish to Kafka as topics 
 	@psql -U materialize -h localhost -p 6875 -d materialize -f init_materialize.sql
 
 down: ## Tear down infrastructure
 	cd infra && terraform destroy -auto-approve
-	docker stop materialize
-	docker rm materialize
 
 clean: ## Remove Spark checkpoints and local logs
 # 	rm -rf spark/checkpoints/

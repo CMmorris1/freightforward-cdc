@@ -16,15 +16,13 @@ A Data Engineering project bridging Software Engineering principles (Python) wit
 Run each command in a seperate terminal for visability
 1. `make up` - Provisions infrastructure & schema
 2. `make producer` - Starts python event stream
-3. `make materialize` - Starts materialize container to store of Debizuim postgres updates and publishes them to Kafka Topic
-
+3. `make materialize` - Creates sources, views and sinks from Debizuim postgres updates and publishes each of them to a respective Kafka Topic
 
 Or
 
 ## 🛠️ Local Setup
 1. `cd infra && terraform apply`
 2. `cd producer && source .venv/bin/activate && python3 simulateFreight.py`
-4. `cd infra && docker run -d --name materialize --network redpanda_network -p 6875:6875 materialize/materialized:latest`
-5. `psql -U materialize -h localhost -p 6875 -d materialize -f init_materialize.sql`
+4. `cd infra && psql -U materialize -h localhost -p 6875 -d materialize -f init_materialize.sql`
 
 

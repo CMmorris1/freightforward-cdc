@@ -125,3 +125,49 @@ resource "kafka-connect_connector" "postgres-cdc"{
   depends_on = [time_sleep.wait_60_seconds]
 }
 
+
+resource "time_sleep" "wait_50_seconds" {
+  create_duration = "50s"
+  depends_on      = [docker_container.redpanda]
+}
+
+# Define the Materialize Docker image
+resource "docker_image" "materialize" {
+  name = "materialize/materialized:latest" # Replace with your preferred version
+}
+
+# Define the Materialize container
+resource "docker_container" "materialize" {
+  name  = "materialize"
+  image = docker_image.materialize.image_id
+
+  # Materialize default SQL port
+  ports {
+    internal = 6875
+    external = 6875
+  }
+
+  # Materialize default HTTP/Console port
+  ports {
+    internal = 8080
+    external = 6874
+  }
+
+  # Connect to the same network as Redpanda and Postgres
+  networks_advanced {
+    name = docker_network.kafka_net.name
+  }
+
+  # Optional: Persistence if needed
+  # volumes {
+  #   container_path = "/var/lib/materialize"
+  #   host_path      = "${path.cwd}/mzdata"
+  # }
+
+
+  depends_on = [
+    time_sleep.wait_50_seconds,
+    docker_container.redpanda,
+    docker_container.postgres
+  ]
+}
