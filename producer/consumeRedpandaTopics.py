@@ -13,6 +13,9 @@ def main():
     freight_jobs_consumer = Consumer(conf)
     freight_jobs_consumer.subscribe(['freight_jobs'])     # Use the topic from your CREATE SINK
 
+    # freight_jobs_history_consumer = Consumer(conf)
+    # freight_jobs_history_consumer.subscribe(['freight_jobs_history'])     # Use the topic from your CREATE SINK
+
     # freight_shipment_consumer = Consumer(conf)
     # freight_shipment_consumer.subscribe(['freight_shipment'])     # Use the topic from your CREATE SINK
         

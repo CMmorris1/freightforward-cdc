@@ -189,10 +189,11 @@ def create_insert_statement(fields, table_name):
 def insert_to_tables(
             database_info,
             jobs_data, 
+            job_history_data,
             shipment_data,
             freight_data,
             invoice_data,
-            purchaseOrder_data,
+            purchaseorder_data,
             db_name_cursor, 
             db_name_connection):
     """
@@ -205,7 +206,7 @@ def insert_to_tables(
         shipment_data: Updated shipment row
         freight_data: Updated freight row
         invoice_data: Updated invoice row
-        purchaseOrder_data: Updated purchaseOrder row
+        purchaseorder_data: Updated purchaseorder row
         cursor: PostgreSQL database cursor 
         connection: PostgreSQL database connection
 
@@ -220,10 +221,11 @@ def insert_to_tables(
             with cursor as cur:
                 # all INSERTS are posrt of one transaction
                 cur.execute(jobs_data['statement'], jobs_data['records'])
+                cur.execute(job_history_data['statement'], job_history_data['records']) 
                 cur.execute(shipment_data['statement'], shipment_data['records'])
                 cur.execute(freight_data['statement'], freight_data['records'])
                 cur.execute(invoice_data['statement'], invoice_data['records'])
-                cur.execute(purchaseOrder_data['statement'], purchaseOrder_data['records'])
+                cur.execute(purchaseorder_data['statement'], purchaseorder_data['records'])
         return True
 
     except Exception as err:
@@ -233,89 +235,15 @@ def insert_to_tables(
         connection.close()
 
 
-def update_job(job, clients, statuses):
-    
-    today = date.today()
+def create_INSERT_statement(item_Dict, itemName):
 
-    job['job_id'] = str(random.randint(1000, 9999))
-    job['job_number'] = "JOB-2026-" + str(random.randint(1000, 9999))
-    job['client_name'] =  random.choice(clients)
-    job['status'] = random.choice(statuses)
-    job['date_opened'] =  str(today - timedelta(days=random.randint(0, 30)))
+    # Capture item_Dict Fields and Values
+    initValues_Fields = list(item_Dict.keys())
 
-    # Capture job Fields
-    initValues_Fields_job = list(job.keys())
-    
-    job_insert_statement = create_insert_statement(initValues_Fields_job, 'job')
+    insert_statement = create_insert_statement(initValues_Fields, itemName)
 
-    return job, job_insert_statement
+    return insert_statement
 
-def update_shipment(shipment, job, modes, locations):
-
-    shipment['shipment_id'] = "SHIP-" + str(random.randint(1000, 9999))
-    shipment['job_id'] = job['job_id']
-    shipment['mode'] = random.choice(modes)
-    shipment['origin'] = random.choice(locations)
-    shipment['destination'] = random.choice(locations)
-
-    while shipment['destination'] == shipment['origin']:
-        shipment['destination'] = random.choice(locations)
-
-    shipment['eta'] = str(datetime.strptime(str(job['date_opened']), "%Y-%m-%d").date() + timedelta(days=random.randint(20, 45)))
-
-    # Capture shipment Fields and Values
-    initValues_Fields_shipment = list(shipment.keys())
-
-    shipment_insert_statement = create_insert_statement(initValues_Fields_shipment, 'shipment')
-
-    return shipment, shipment_insert_statement
-
-def update_freight(freight, shipment):
-    freight_insert_statement = ''
-
-    freight['freight_id'] = "FREIGHT-" + str(random.randint(1000, 9999))
-    freight['shipment_id'] = shipment['shipment_id']
-
-    # Capture freight Fields and Values
-    initValues_Fields_frieght = list(freight.keys())
-
-    freight_insert_statement = create_insert_statement(initValues_Fields_frieght, 'freight')
-
-    return freight, freight_insert_statement
-
-def update_invoice(invoice, job, shipment, freight, currency, paymentStatuses):
-    invoice_insert_statement = ''
-
-    taxAmount = freight['quantity'] * .30 # 30% tax
-    invoice['invoice_id'] = str(random.randint(1000, 9999))
-    invoice['job_id'] = job['job_id']
-    invoice['total_amount'] = freight['quantity'] + taxAmount
-    invoice['currency'] = currency[shipment['origin']]
-    invoice['due_date'] = str(datetime.strptime(str(job['date_opened']), "%Y-%m-%d").date() + timedelta(days=30)) # 30 days from job date opening 
-    invoice['status'] = random.choice(paymentStatuses)
-
-    # Capture invoice Fields and Values
-    initValues_Fields_invoice = list(invoice.keys())
-
-    invoice_insert_statement = create_insert_statement(initValues_Fields_invoice, 'invoice')
-
-    return invoice, invoice_insert_statement
-
-def update_purchaseorder(purchaseOrder, job, freight, vendors, serviceTypes):
-    purchaseOrder_insert_statement = ''
-
-    purchaseOrder['po_id'] = str(random.randint(1000, 9999))
-    purchaseOrder['job_id'] = job['job_id']
-    purchaseOrder['vendor_name'] = random.choice(vendors)
-    purchaseOrder['amount_due_USD'] = freight['quantity'] * 160
-    purchaseOrder['service_type'] = random.choice(serviceTypes)
-
-    # Capture purchaseOrder Fields and Values
-    initValues_Fields_purchaseOrder = list(purchaseOrder.keys())
-
-    purchaseOrder_insert_statement = create_insert_statement(initValues_Fields_purchaseOrder, 'purchaseorder')
-
-    return purchaseOrder, purchaseOrder_insert_statement
 
 def main():
 
@@ -328,7 +256,7 @@ def main():
     statuses = ["BOOKED", "PICKED_UP", "IN_TRANSIT", "DELIVERED"]
 
     # shipment lists
-    modes = ["AIR", "OCEAN", "GROUND"]
+    modes = ["AIR", "OCEAN"]
     locations = ["CAVAN", "USLAX", "MXCOL"]
 
     # invoice list
@@ -343,32 +271,38 @@ def main():
 
     # job dictionary
     job = {
-        'job_id': 100,
-        'job_number': "JOB-2026-" + f"{numberofjob:03d}",
-        'client_name': clients[0],
-        'status': statuses[0],
-        'date_opened': today.strftime("%Y-%m-%d")
+        'job_id': None,
+        'job_number': None,
+        'origin': None,
+        'destination': None,
+        'client_name': None,
+        'date_opened': None
+    }
+
+    # job history dictionary
+    job_history = {
+        # 'history_id': None,
+        'job_id': None,
+        'status': None,
+        'created_at': None
     }
 
     # shipment dictionary
     shipment = {
-        'shipment_id': "SHIP-" + f"{0:03d}",	
-        'job_id': job['job_id'],
-        'mode': modes[0],
-        'origin': locations[0],
-        'destination': locations[2],
-        'eta': today + timedelta(days=10) # random date between 10 - 30 days from job date opening 
+        'shipment_id': None,	
+        'job_id': None,
+        'mode': None,
+        'eta': None # random date between 10 - 30 days from job date opening 
     }
 
-    # freight dictionary
-    freightdescription	= "Solar Panels"
+    # freight dictionaryß
     freight = {
-        'freight_id': "FREIGHT-" + f"{0:03d}",
-        'shipment_id': shipment['shipment_id'],
-        'description': freightdescription,
-        'weight_kg': 4500,
-        'volume_cbm': 22.5,
-        'quantity': 20 # 20 pallets, 24 solar panels in 1 pallet
+        'freight_id': None,
+        'shipment_id': None,
+        'description': None,
+        'weight_kg': None,
+        'volume_cbm': None,
+        'quantity': None # 20 pallets, 24 solar panels in 1 pallet
     }
 
     # invoice dictionary
@@ -376,23 +310,23 @@ def main():
     # Actual Received Quantity x Unit Price) + Tax + Shipping
     # Invoice Total = (Taxable Items Total) + (Tax Amount) + (Non-Taxable Items)
 
-    taxAmount = freight['quantity'] * .30 # 30% tax
+
     invoice = {
-        'invoice_id': f"{0:03d}",
-        'job_id': job['job_id'],
-        'total_amount': freight['quantity'] + taxAmount,
-        'currency': currency[shipment['origin']],
-        'due_date': datetime.strptime(str(job['date_opened']), "%Y-%m-%d").date() + timedelta(days=30), # 30 days from job date opening 
-        'status': paymentStatuses[0]
+        'invoice_id': None,
+        'job_id': None,
+        'total_amount': None,
+        'currency': None,
+        'due_date': None, # 30 days from job date opening 
+        'status': None
     }
 
     # purchase order dictionary
-    purchaseOrder = {
-        'po_id': f"{0:03d}",
-        'job_id': job['job_id'],
-        'vendor_name': vendors[0],
-        'amount_due_USD': freight['quantity'] * 160, # $300 per pannel
-        'service_type': serviceTypes[0]  
+    purchaseorder = {
+        'po_id': None,
+        'job_id': None,
+        'vendor_name': None,
+        'amount_due_USD': None, # $300 per pannel
+        'service_type': None  
     }
 
     # Read database Json
@@ -445,84 +379,164 @@ def main():
     # SIMULATE DATA 
 
     while True:
-        # ****** JOB ******
-        newJob, job_insert_statement = update_job(job, clients, statuses)
-        initValues_Values_job = list(newJob.values())
-        jobs_data_dict = {
-            'statement':job_insert_statement,
-            'records':initValues_Values_job
-        }
 
-        # print job to view
-        job_output = " | ".join(f"{value}" for key, value in newJob.items())
-        print("JOB: " + job_output + "\n")
-        
-        
-        # ****** SHIPMENT ******
-        newShipment, shipment_insert_statement = update_shipment(shipment, job, modes, locations)
-        initValues_Values_shipment = list(newShipment.values())
-        shipment_data_dict = {
-            'statement':shipment_insert_statement,
-            'records':initValues_Values_shipment
-        }
+        for client in clients:
+            today = date.today()
 
-        # print shipmnet to view
-        shipment_output = " | ".join(f"{value}" for key, value in newShipment.items())
-        print("SHIP: " + shipment_output + "\n")
+            #Create a job for a new client
+            job['job_id'] = str(random.randint(1000, 9999))
+            job['job_number'] = "JOB-2026-" + str(random.randint(1000, 9999))
+            job['client_name'] =  client
+            job['origin'] = 'CNSHA'
+            job['destination'] = random.choice(locations)
+            job['date_opened'] =  str(today - timedelta(days=random.randint(0, 30)))
+
+            #Create a job history for the new client
+            job_history['job_id'] = job['job_id']
+            job_history['created_at'] = str(datetime.strptime(str(job['date_opened']), "%Y-%m-%d").date() + timedelta(days=random.randint(0, 6)))
+            
+            #Create a shipment for the new client
+            shipment['shipment_id'] = "SHIP-" + str(random.randint(1000, 9999))
+            shipment['job_id'] = job['job_id']
+            shipment['mode'] = random.choice(modes)
+            shipment['eta'] = str(datetime.strptime(str(job['date_opened']), "%Y-%m-%d").date() + timedelta(days=random.randint(20, 45)))
+
+            #Create a freight for the new client
+            freight['freight_id'] = "FREIGHT-" + str(random.randint(1000, 9999))
+            freight['shipment_id'] = shipment['shipment_id']
+            freight['description'] = 'Solar Panels'
+            freight['weight_kg'] = 4500
+            freight['volume_cbm'] = 22.5
+            freight['quantity'] = 20
+
+            #Create an invoice for the new client
+            taxAmount = freight['quantity'] * .30 # 30% tax
+            invoice['invoice_id'] = str(random.randint(1000, 9999))
+            invoice['job_id'] = job['job_id']
+            invoice['total_amount'] = freight['quantity'] + taxAmount
+            invoice['currency'] = currency[job['destination']]
+            invoice['due_date'] = str(datetime.strptime(str(job['date_opened']), "%Y-%m-%d").date() + timedelta(days=30)) # 30 days from job date opening 
+            invoice['status'] = paymentStatuses[0] #Unpaid until delivered
+            
+            #Create a purchase order for the new client
+            purchaseorder['po_id'] = str(random.randint(1000, 9999))
+            purchaseorder['job_id'] = job['job_id']
+            purchaseorder['vendor_name'] = random.choice(vendors)
+            purchaseorder['amount_due_USD'] = freight['quantity'] * 160
+            purchaseorder['service_type'] = random.choice(serviceTypes)
+
+            for job_status in statuses:
+                # ****** JOB ******
+                job_insert_statement = create_INSERT_statement(job, 'job')
+                initValues_Values_job = list(job.values())
+
+                job_data_dict = {
+                    'statement':job_insert_statement,
+                    'records':initValues_Values_job
+                }
+
+                # print job to view
+                job_output = " | ".join(f"{value}" for key, value in job.items())
+                print("JOB: " + job_output + "\n")
+                
+                
+                # ****** JOB HISTORY ******
+                job_history['status'] =  job_status
+
+                if statuses[1] in job_history['status']:
+                    job_history['created_at'] = str(datetime.strptime(str(job_history['created_at']), "%Y-%m-%d").date() + timedelta(days=random.randint(0, 3)))
+                elif statuses[2] in job_history['status']:
+                    job_history['created_at'] = str(datetime.strptime(str(shipment['eta']), "%Y-%m-%d").date() - timedelta(days=random.randint(0, 3)))
+                else:
+                    job_history['created_at'] = str(datetime.strptime(str(job_history['created_at']), "%Y-%m-%d").date() + timedelta(days=random.randint(0, 6)))
+                job_history_insert_statement = create_INSERT_statement(job_history, 'job_history')
+                initValues_Values_job_history = list(job_history.values())
+
+                job_history_data_dict = {
+                    'statement':job_history_insert_statement,
+                    'records':initValues_Values_job_history
+                }
+
+                # print job to view
+                job_history_output = " | ".join(f"{value}" for key, value in job_history.items())
+                print("JOB HISTORY: " + job_history_output + "\n")
+
+                # ****** SHIPMENT ******
+                shipment_insert_statement = create_INSERT_statement(shipment, 'shipment')
+                initValues_Values_shipment = list(shipment.values())
+
+                shipment_data_dict = {
+                    'statement':shipment_insert_statement,
+                    'records':initValues_Values_shipment
+                }
+
+                # print shipmnet to view
+                shipment_output = " | ".join(f"{value}" for key, value in shipment.items())
+                print("SHIP: " + shipment_output + "\n")
 
 
-        # ****** FREIGHT ******
-        newFreight, freight_insert_statement = update_freight(freight, shipment)
-        initValues_Values_freight = list(newFreight.values())
-        freight_data_dict = {
-            'statement':freight_insert_statement,
-            'records':initValues_Values_freight
-        }
+                # ****** FREIGHT ******
+                freight_insert_statement = create_INSERT_statement(freight, 'freight')
+                initValues_Values_freight = list(freight.values())
 
-        # print freight to view
-        freight_output = " | ".join(f"{value}" for key, value in newFreight.items())
-        print("FREIGHT: " + freight_output + "\n")
+                freight_data_dict = {
+                    'statement':freight_insert_statement,
+                    'records':initValues_Values_freight
+                }
 
-
-        # ****** INVOICE ******
-        newInvoice, invoice_insert_statement = update_invoice(invoice, job, shipment, freight, currency, paymentStatuses)
-        initValues_Values_invoice = list(newInvoice.values())
-        invoice_data_dict = {
-            'statement':invoice_insert_statement,
-            'records':initValues_Values_invoice
-        }
-
-        # print invoice to view
-        invoice_output = " | ".join(f"{value}" for key, value in newInvoice.items())
-        print("INVOICE: " + invoice_output + "\n")
+                # print freight to view
+                freight_output = " | ".join(f"{value}" for key, value in freight.items())
+                print("FREIGHT: " + freight_output + "\n")
 
 
-        # ****** PURCHASE ORDER ******
-        newPurchaseOrder, purchaseOrder_insert_statement = update_purchaseorder(purchaseOrder, job, freight, vendors, serviceTypes)
-        initValues_Values_purchaseorder = list(newPurchaseOrder.values())
-        purchaseOrder_data_dict = {
-            'statement':purchaseOrder_insert_statement,
-            'records':initValues_Values_purchaseorder
-        }
+                # ****** INVOICE ******
+                # Maybe they have paid already, or maybe not
+                if paymentStatuses[0] in invoice['status'] and job_status not in statuses[3]:
+                    invoice['status'] = random.choice(paymentStatuses)
+                else:
+                    invoice['status'] = paymentStatuses[1]
 
-        # print invoice to view
-        purchaseOrder_output = " | ".join(f"{value}" for key, value in newPurchaseOrder.items())
-        print("PO: " + purchaseOrder_output + "\n")
+                invoice_insert_statement = create_INSERT_statement(invoice, 'invoice')
+                initValues_Values_invoice = list(invoice.values())
+                
+                invoice_data_dict = {
+                    'statement':invoice_insert_statement,
+                    'records':initValues_Values_invoice
+                }
 
-        print("------------------------------------------------------------------------\n")
-        
-        # insert records to database
-        insert_to_tables(
-            database_info,
-            jobs_data_dict, 
-            shipment_data_dict,
-            freight_data_dict,
-            invoice_data_dict,
-            purchaseOrder_data_dict,
-            db_name_cursor, 
-            db_name_connection)
+                # print invoice to view
+                invoice_output = " | ".join(f"{value}" for key, value in invoice.items())
+                print("INVOICE: " + invoice_output + "\n")
 
-        time.sleep(3)
+
+                # ****** PURCHASE ORDER ******
+                purchaseorder_insert_statement = create_INSERT_statement(purchaseorder, 'purchaseorder')
+                initValues_Values_purchaseorder = list(purchaseorder.values())
+
+                purchaseorder_data_dict = {
+                    'statement':purchaseorder_insert_statement,
+                    'records':initValues_Values_purchaseorder
+                }
+
+                # print invoice to view
+                purchaseorder_output = " | ".join(f"{value}" for key, value in purchaseorder.items())
+                print("PO: " + purchaseorder_output + "\n")
+
+                print("------------------------------------------------------------------------\n")
+                
+                # insert records to database
+                insert_to_tables(
+                    database_info,
+                    job_data_dict,
+                    job_history_data_dict, 
+                    shipment_data_dict,
+                    freight_data_dict,
+                    invoice_data_dict,
+                    purchaseorder_data_dict,
+                    db_name_cursor, 
+                    db_name_connection)
+
+                time.sleep(3)
 
 if __name__ == '__main__':
     main()

@@ -13,11 +13,12 @@
             "job":
                 {
                     "columns":
-                        {
+                        {   
                             "job_id": "int", 
                             "job_number": "text", 
-                            "client_name": "text", 
-                            "status": "text", 
+                            "origin": "text", 
+                            "destination": "text",
+                            "client_name": "text",
                             "date_opened":"text"
                         },
                     "initValues":
@@ -27,16 +28,32 @@
                         }
                     ]
                 },
-                
+
+            "job_history":
+                {
+                    "columns":
+                        {   
+                            "history_id": "serial", 
+                            "job_id": "int REFERENCES job(job_id)", 
+                            "status": "text", 
+                            "created_at":"text"
+                        },
+                    "initValues":
+                    [
+                        {
+
+                        }
+                    ]
+                },
+                      
             "shipment":
                 {
                     "columns":
                         {
-                            "shipment_id": "text", 
+                            "record_id": "serial",
+                            "shipment_id": "text UNIQUE", 
                             "job_id": "int REFERENCES job(job_id)", 
                             "mode": "text", 
-                            "origin": "text", 
-                            "destination": "text",
                             "eta": "text"
                         },
                     "initValues":
