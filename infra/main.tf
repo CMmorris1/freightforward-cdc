@@ -26,9 +26,17 @@ resource "docker_image" "redpanda" {
 resource "docker_container" "redpanda" {
   name  = "redpanda"
   image = docker_image.redpanda.name
-  command = ["redpanda", "start", "--overprovisioned", "--kafka-addr", "0.0.0.0:9092", "--advertise-kafka-addr", "redpanda:9092", "--smp", "1", "--memory", "1G", "--reserve-memory", "0M", "--node-id", "0", "--check=false"]
-  #command = ["redpanda", "start", "--overprovisioned"]
+  command = [
+    "redpanda", "start", "--overprovisioned", 
+    "--kafka-addr", "internal://0.0.0.0:9092,external://0.0.0.0:19092", 
+    "--advertise-kafka-addr", "internal://redpanda:9092,external://127.0.0.1:19092", 
+    "--smp", "1", "--memory", "1G", "--reserve-memory", "0M", "--node-id", "0", "--check=false"]
   networks_advanced { name = docker_network.kafka_net.name }
+    ports { 
+    internal = 19092 
+    external = 19092 
+  }
+  
   ports { 
     internal = 9092 
     external = 9092 
@@ -116,3 +124,4 @@ resource "kafka-connect_connector" "postgres-cdc"{
   }
   depends_on = [time_sleep.wait_60_seconds]
 }
+
