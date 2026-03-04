@@ -18,33 +18,20 @@ def check_missing_items(data, required_table_fields):
     else:
         return 0
 
-# --- JOB CRUD ROUTES MATERIALIZE ---
-# @app.route('/jobs', methods=['GET'])
-# def get_jobs():
-#     results = db.session.execute(db.select(Job_mv)).scalars().all()
-    
-#     # Convert to JSON for the response
-#     return jsonify([{"job_id": r.job_id, "job_number": r.job_number} for r in results])
+def check_items_in_table(data, required_table_fields):
+    # check if Json variables exists in table columns
+    includes = [field for field in required_table_fields if field in data]
 
-#     # Access internal JSON fields directly from the .data attribute
-#     jobs_list = []
-#     for row in results:
-#         job_info = row.data  # This is already a Python dict
-#         jobs_list.append({
-#             "job_id": job_info.get("job_id"),
-#             "job_number": job_info.get("job_number"),
-#             "origin": job_info.get("origin"),
-#             "destination": job_info.get("destination"),
-#             "client_name": job_info.get("client_name"),
-#             "date_opened": job_info.get("date_opened")
-#     })
+    if missing:
+        return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
+    else:
+        return 0
 
-#     return jsonify(jobs_list)
 
 #--- JOB CRUD ROUTES POSTGRES---
 
 # CREATE JOB
-@app.route('/create_job', methods=['POST'])
+@app.route('/job/create', methods=['POST'])
 def create_job():
     data = request.get_json()
     if not data:
@@ -72,7 +59,7 @@ def create_job():
         return check
 
 # READ ALL JOBS
-@app.route('/jobs_all', methods=['GET'])
+@app.route('/jobs', methods=['GET'])
 def get_jobs_all():
     # Query the job table and build a list of dictionaries for all relavent entries
     Jobs_dict = [{
@@ -95,7 +82,7 @@ def get_jobs_all():
     return response
 
 # READ ONE JOB
-@app.route('/job=<job_id>', methods=['GET'])
+@app.route('/job/<job_id>', methods=['GET'])
 def get_job(job_id):
     # Query the job table and filter specifc job id
     Job_dict = [{
@@ -117,27 +104,46 @@ def get_job(job_id):
 
     return response
 
-    # @app.route('/delete_job=<job_id>', methods=['GET', 'POST'])
-    # def delete_job(job_id):
-    #     job = Job.query.get_or_404(job_id)
+# UPDATE JOB
+@app.route('/job/update/<job_id>', methods=['PUT'])
+def update_job(job_id):
+    job = Job.query.filter_by(job_id=job_id).first_or_404()
+    
+    json_data = request.get_json()
 
-    #     try:
-    #         db.session.delete(job) # Mark the object for deletion
-    #         db.session.commit() # Commit the changes to the database
-    #         message = "Job '{}' deleted successfully!".format(job_id)
-    #         response = jsonify({'message': message})
-        
-    #     except:
-    #         db.session.rollback()
-    #         message = "An error occured during the deletion of Job '{}'".format(job_id)
-    #         response = jsonify({'message': message})
-            
-    #     return response
+    if not request.json:
+        abort(400)
+
+    # Update the job object with new data
+    if json_data is not None and 'job_number' in json_data:
+        job.job_number = request.json.get('job_number', job.job_number)
+    if json_data is not None and 'origin' in json_data:
+        job.origin = request.json.get('origin', job.origin)
+    if json_data is not None and 'destination' in json_data:
+        job.destination = request.json.get('destination', job.destination)
+    if json_data is not None and 'client_name' in json_data:
+        job.client_name = request.json.get('client_name', job.client_name)
+    if json_data is not None and 'date_opened' in json_data:
+        job.date_opened = request.json.get('date_opened', job.date_opened)
+    
+    db.session.commit() # Commit the changes to the database
+
+    return jsonify({"message": "Job updated", "job_id": job.job_id})
+
+
+# DELETE
+@app.route('/job/delete/<job_id>', methods=['DELETE'])
+def delete_job(job_id):
+    job = Job.query.filter_by(job_id=job_id).first_or_404()
+    db.session.delete(job) 
+    db.session.commit()
+    return jsonify({'Result': True, 'message': 'Job Deleted'})
+
 
 #--- JOB HISTORY CRUD ROUTES POSTGRES---
 
 # CREATE JOB HISTORY
-@app.route('/create_jobhistory', methods=['POST'])
+@app.route('/job_history/create', methods=['POST'])
 def create_jobhistory():
     data = request.get_json()
     if not data:
@@ -162,7 +168,7 @@ def create_jobhistory():
         return check
 
 # READ ALL JOBS HISTORIES
-@app.route('/jobs_history_all', methods=['GET'])
+@app.route('/jobs_history', methods=['GET'])
 def get_jobs_history_all():
     # Query the job_history table and build a list of dictionaries for all relavent entries
     Jobs_history_dict = [{
@@ -183,7 +189,7 @@ def get_jobs_history_all():
     return response
 
 # READ ONE JOB HISTORY
-@app.route('/job_history=<job_id>', methods=['GET'])
+@app.route('/job_history/<job_id>', methods=['GET'])
 def get_job_history(job_id):
     # Query the job table and filter specifc job id
     Job_history_dict = [{
@@ -203,10 +209,65 @@ def get_job_history(job_id):
 
     return response
 
+# UPDATE JOB HISTORY
+@app.route('/job_history/update/<job_id>', methods=['PUT'])
+def update_job_histroy(job_id):
+   
+    job_histroy = JobHistory.query.filter_by(job_id=job_id).first_or_404()
+    
+    json_data = request.get_json()
+
+    if not request.json:
+        abort(400)
+
+    # Update the job history object with new data
+    if json_data is not None and 'status' in json_data:
+        job_histroy.status = request.json.get('status', job_histroy.status)
+    if json_data is not None and 'created_at' in json_data:
+        job_histroy.created_at = request.json.get('created_at', job_histroy.created_at)
+    
+    db.session.commit() # Commit the changes to the database
+
+    return jsonify({"message": "Job History updated", "job_id": job_histroy.job_id})
+
+# DELETE
+@app.route('/job_history/delete/<job_id>', methods=['DELETE'])
+def delete_jobs_history(job_id):
+    job_history = JobHistory.query.filter_by(job_id=job_id).delete() # DELETES all records with filter condition
+    db.session.commit()
+    return jsonify({'Result': True, 'message': 'Job Deleted'})
+
+
 #--- SHIPMENT CRUD ROUTES POSTGRES---
 
+# CREATE SHIPMENT
+@app.route('/shipment/create', methods=['POST'])
+def create_shipment():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    table_fields = ['shipment_id', 'job_id', 'mode', 'eta']
+
+    check = check_missing_items(data, table_fields)
+    
+    if check == 0:
+        new_shipment = Shipment(
+            shipment_id = request.json['shipment_id'],
+            job_id = request.json['job_id'],
+            mode = request.json['mode'],
+            eta = request.json['eta']
+        )
+
+        db.session.add(new_shipment)
+        db.session.commit() 
+
+        return jsonify({"message": "Shipment created", "job_id": new_shipment.shipment_id}), 201
+    else:
+        return check
+
 # READ ALL SHIPMENTS
-@app.route('/shipments_all', methods=['GET'])
+@app.route('/shipments', methods=['GET'])
 def get_shipments_all():
     # Query the shipment table and build a list of dictionaries for all relavent entries
     Shipments_dict = [{
@@ -228,7 +289,7 @@ def get_shipments_all():
     return response
 
 # READ ONE SHIPMENT
-@app.route('/shipment=<shipment_id>', methods=['GET'])
+@app.route('/shipment/<shipment_id>', methods=['GET'])
 def get_shipment(shipment_id):
     # Query the shipment table and filter specifc shipment id
     Shipment_dict = [{
@@ -249,11 +310,68 @@ def get_shipment(shipment_id):
 
     return response
 
+# UPDATE SHIPMENT
+@app.route('/shipment/update/<job_id>', methods=['PUT'])
+def update_shipment(job_id):
+   
+    shipment = Shipment.query.filter_by(job_id=job_id).first_or_404()
+    
+    json_data = request.get_json()
+
+    if not request.json:
+        abort(400)
+
+    # Update the shipment object with new data
+    if json_data is not None and 'mode' in json_data:
+        shipment.mode = request.json.get('mode', shipment.mode)
+    if json_data is not None and 'eta' in json_data:
+        shipment.eta = request.json.get('eta', shipment.eta)
+    
+    db.session.commit() # Commit the changes to the database
+
+    return jsonify({"message": "Shipment updated", "job_id": shipment.job_id})
+
+# DELETE
+@app.route('/shipment/delete/<job_id>', methods=['DELETE'])
+def delete_shipment(job_id):
+    shipment = Shipment.query.filter_by(job_id=job_id).first_or_404()
+    db.session.delete(shipment) 
+    db.session.commit()
+    return jsonify({'Result': True, 'message': 'Shipment Deleted'})
+
 
 #--- FREIGHT CRUD ROUTES POSTGRES---
 
+# CREATE FREIGHT
+@app.route('/freight/create', methods=['POST'])
+def create_freight():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    table_fields = ['freight_id', 'shipment_id', 'description', 'weight_kg', 'volume_cbm', 'quantity']
+
+    check = check_missing_items(data, table_fields)
+    
+    if check == 0:
+        new_freight = Freight(
+            freight_id = request.json['freight_id'],
+            shipment_id = request.json['shipment_id'],
+            description = request.json['description'],
+            weight_kg = request.json['weight_kg'],
+            volume_cbm = request.json['volume_cbm'],
+            quantity = request.json['quantity']
+        )
+
+        db.session.add(new_freight)
+        db.session.commit() 
+
+        return jsonify({"message": "Freight created", "freight_id": new_freight.freight_id}), 201
+    else:
+        return check
+
 # READ ALL FREIGHTS
-@app.route('/freights_all', methods=['GET'])
+@app.route('/freights', methods=['GET'])
 def get_freights_all():
     # Query the freight table and build a list of dictionaries for all relavent entries
     Freights_dict = [{
@@ -276,7 +394,7 @@ def get_freights_all():
     return response
 
 # READ ONE FREIGHT
-@app.route('/freight=<freight_id>', methods=['GET'])
+@app.route('/freight/<freight_id>', methods=['GET'])
 def get_freight(freight_id):
     # Query the freight table and filter specifc shipment id
     Freight_dict = [{
@@ -298,11 +416,72 @@ def get_freight(freight_id):
 
     return response
 
+# UPDATE FREIGHT
+@app.route('/freight/update/<freight_id>', methods=['PUT'])
+def update_freight(freight_id):
+   
+    freight = Freight.query.filter_by(freight_id=freight_id).first_or_404()
+    
+    json_data = request.get_json()
+
+    if not request.json:
+        abort(400)
+
+    # Update the freight object with new data
+    if json_data is not None and 'description' in json_data:
+        freight.description = request.json.get('description', freight.description)
+    if json_data is not None and 'volume_cbm' in json_data:
+        freight.volume_cbm = request.json.get('volume_cbm', freight.volume_cbm)
+    if json_data is not None and 'weight_kg' in json_data:
+        freight.weight_kg = request.json.get('weight_kg', freight.weight_kg)
+    if json_data is not None and 'quantity' in json_data:
+        freight.quantity = request.json.get('quantity', freight.quantity)
+
+    db.session.commit() # Commit the changes to the database
+
+    return jsonify({"message": "Freight updated", "freight_id": freight.freight_id})
+
+# DELETE
+@app.route('/freight/delete/<freight_id>', methods=['DELETE'])
+def delete_freight(freight_id):
+    freight = Freight.query.filter_by(freight_id=freight_id).first_or_404()
+    db.session.delete(freight) 
+    db.session.commit()
+    return jsonify({'Result': True, 'message': 'Freight Deleted'})
+
+
 #--- INVOICE CRUD ROUTES POSTGRES---
 
+# CREATE FREIGHT
+@app.route('/invoice/create', methods=['POST'])
+def create_invoice():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    table_fields = ['invoice_id', 'job_id', 'total_amount', 'currency', 'due_date', 'status']
+
+    check = check_missing_items(data, table_fields)
+    
+    if check == 0:
+        new_invoice = Invoice(
+            invoice_id = request.json['invoice_id'],
+            job_id = request.json['job_id'],
+            total_amount = request.json['total_amount'],
+            currency = request.json['currency'],
+            due_date = request.json['due_date'],
+            status = request.json['status']
+        )
+
+        db.session.add(new_invoice)
+        db.session.commit() 
+
+        return jsonify({"message": "Invoice created", "invoice_id": new_invoice.invoice_id}), 201
+    else:
+        return check
 
 # READ ALL INVOICES
-@app.route('/invoices_all', methods=['GET'])
+@app.route('/invoices', methods=['GET'])
 def get_invoices_all():
     # Query the freight table and build a list of dictionaries for all relavent entries
     Invoices_dict = [{
@@ -325,7 +504,7 @@ def get_invoices_all():
     return response
 
 # READ ONE INVOICE
-@app.route('/invoice=<invoice_id>', methods=['GET'])
+@app.route('/invoice/<invoice_id>', methods=['GET'])
 def get_invoice(invoice_id):
     # Query the freight table and filter specifc shipment id
     Invoice_dict = [{
@@ -347,11 +526,72 @@ def get_invoice(invoice_id):
 
     return response
 
+# UPDATE INVOICE
+@app.route('/invoice/update/<job_id>', methods=['PUT'])
+def update_invoice(job_id):
+   
+    invoice = Invoice.query.filter_by(job_id=job_id).first_or_404()
+    
+    json_data = request.get_json()
+
+    if not request.json:
+        abort(400)
+
+    # Update the invoice object with new data
+    if json_data is not None and 'total_amount' in json_data:
+        invoice.total_amount = request.json.get('total_amount', invoice.total_amount)
+    if json_data is not None and 'currency' in json_data:
+        invoice.currency = request.json.get('currency', invoice.currency)
+    if json_data is not None and 'due_date' in json_data:
+        invoice.due_date = request.json.get('due_date', invoice.due_date)
+    if json_data is not None and 'status' in json_data:
+        invoice.status = request.json.get('status', invoice.status)
+
+    db.session.commit() # Commit the changes to the database
+
+    return jsonify({"message": "Invoice updated", "job_id": invoice.job_id})
+
+
+# DELETE
+@app.route('/invoice/delete/<invoice_id>', methods=['DELETE'])
+def delete_invoice(invoice_id):
+    invoice = Invoice.query.filter_by(invoice_id=invoice_id).first_or_404()
+    db.session.delete(invoice) 
+    db.session.commit()
+    return jsonify({'Result': True, 'message': 'Invoice Deleted'})
+
 
 #--- PURCHASE ORDER CRUD ROUTES POSTGRES---
 
+# CREATE PURCHASE ORDER
+@app.route('/purchaseorder/create', methods=['POST'])
+def create_purchaseorder():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    table_fields = ['po_id', 'job_id', 'vendor_name', 'amount_due_usd', 'service_type']
+
+    check = check_missing_items(data, table_fields)
+    
+    if check == 0:
+        new_purchaseorder = PurchaseOrder(
+            po_id = request.json['po_id'],
+            job_id = request.json['job_id'],
+            vendor_name = request.json['vendor_name'],
+            amount_due_usd = request.json['amount_due_usd'],
+            service_type = request.json['service_type']
+        )
+
+        db.session.add(new_purchaseorder)
+        db.session.commit() 
+
+        return jsonify({"message": "Purchse Order created", "po_id": new_purchaseorder.po_id}), 201
+    else:
+        return check
+
 # READ ALL PURCHASE ORDERS
-@app.route('/purchaseorders_all', methods=['GET'])
+@app.route('/purchaseorders', methods=['GET'])
 def get_purchaseorders_all():
     # Query the purchase order table and build a list of dictionaries for all relavent entries
     PurchaseOrders_dict = [{
@@ -374,7 +614,7 @@ def get_purchaseorders_all():
 
 
 # READ ONE PURCHASE ORDER
-@app.route('/purchaseorder=<job_id>', methods=['GET'])
+@app.route('/purchaseorder/<job_id>', methods=['GET'])
 def get_purchaseorder(job_id):
     # Query the freight table and filter specifc shipment id
     PurchaseOrder_dict = [{
@@ -395,50 +635,34 @@ def get_purchaseorder(job_id):
 
     return response
 
-# # CREATE
-# @app.route('/books', methods=['POST'])
-# def create_book():
-#     if not request.json or not 'title' in request.json or not 'author' in request.json:
-#         abort(400) # Bad request if data is missing
+# UPDATE INVOICE
+@app.route('/purchaseorder/update/<job_id>', methods=['PUT'])
+def update_purchaseorder(job_id):
+   
+    purchaseorder = PurchaseOrder.query.filter_by(job_id=job_id).first_or_404()
     
-#     new_book = Book(
-#         title=request.json['title'],
-#         author=request.json['author']
-#     )
-#     db.session.add(new_book)
-#     db.session.commit() # Commit the session to save the new instance
-#     return jsonify({'book': new_book.to_dict()}), 201
+    json_data = request.get_json()
 
-# # READ all
-# @app.route('/books', methods=['GET'])
-# def get_books():
-#     books = Book.query.all() # Fetch all Book items
-#     return jsonify([book.to_dict() for book in books])
+    if not request.json:
+        abort(400)
 
-# # READ one
-# @app.route('/books/<int:book_id>', methods=['GET'])
-# def get_book(book_id):
-#     book = Book.query.get_or_404(book_id) # Fetch a specific item by ID
-#     return jsonify(book.to_dict())
+    # Update the PurchaseOrder object with new data
+    if json_data is not None and 'vendor_name' in json_data:
+        purchaseorder.vendor_name = request.json.get('vendor_name', purchaseorder.vendor_name)
+    if json_data is not None and 'amount_due_usd' in json_data:
+        purchaseorder.amount_due_usd = request.json.get('amount_due_usd', purchaseorder.amount_due_usd)
+    if json_data is not None and 'service_type' in json_data:
+        purchaseorder.service_type = request.json.get('service_type', purchaseorder.service_type)
 
-# # UPDATE
-# @app.route('/books/<int:book_id>', methods=['PUT'])
-# def update_book(book_id):
-#     book = Book.query.get_or_404(book_id)
-#     if not request.json:
-#         abort(400)
-    
-#     # Update the book object with new data
-#     book.title = request.json.get('title', book.title)
-#     book.author = request.json.get('author', book.author)
-    
-#     db.session.commit() # Commit the changes to the database
-#     return jsonify({'book': book.to_dict()})
+    db.session.commit() # Commit the changes to the database
 
-# # DELETE
-# @app.route('/books/<int:book_id>', methods=['DELETE'])
-# def delete_book(book_id):
-#     book = Book.query.get_or_404(book_id)
-#     db.session.delete(book) # Mark the object for deletion
-#     db.session.commit() # Finalize the deletion
-#     return jsonify({'result': True, 'message': 'Book deleted'})
+    return jsonify({"message": "Purchase Order updated", "job_id": purchaseorder.job_id})
+
+# DELETE
+@app.route('/purchaseorder/delete/<job_id>', methods=['DELETE'])
+def delete_purchaseorder(job_id):
+    purchaseorder = PurchaseOrder.query.filter_by(job_id=job_id).first_or_404()
+    db.session.delete(purchaseorder) 
+    db.session.commit()
+    return jsonify({'Result': True, 'message': 'PurchaseOrder Deleted'})
+
