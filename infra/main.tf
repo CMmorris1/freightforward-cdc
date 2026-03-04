@@ -22,7 +22,7 @@ resource "docker_image" "redpanda" {
   keep_locally = true
 }
 
-# 2. Redpanda Broker
+# 2. Define a Redpanda Broker container
 resource "docker_container" "redpanda" {
   name  = "redpanda"
   image = docker_image.redpanda.name
@@ -43,7 +43,7 @@ resource "docker_container" "redpanda" {
   }
 }
 
-# 3. Postgres with CDC enabled
+# 3. Define a Postgres container with CDC enabled
 resource "docker_container" "postgres" {
   name    = "postgres"
   image   = "postgres:17"
@@ -56,7 +56,7 @@ resource "docker_container" "postgres" {
   }
 }
 
-# 4. Debezium (Kafka Connect)
+# 4. Define a Debezium (Kafka Connect) container
 resource "docker_container" "debezium" {
   name  = "debezium"
   image = "quay.io/debezium/connect:2.7.0.Final"
@@ -82,7 +82,7 @@ resource "docker_container" "debezium" {
   depends_on = [docker_container.redpanda]
 }
 
-# 5. Redpanda Console (Web UI)
+# 5. Define a Redpanda Console (Web UI)
 resource "docker_container" "console" {
   name  = "redpanda-console"
   image = docker_image.redpanda.name
@@ -106,7 +106,7 @@ resource "time_sleep" "wait_60_seconds" {
 }
 
 
-# 7. Configure the Postgres Connector
+# 7. Define a Postgres Connector
 provider "kafka-connect" { url = "http://localhost:8083" }
 
 resource "kafka-connect_connector" "postgres-cdc"{
@@ -131,7 +131,7 @@ resource "time_sleep" "wait_50_seconds" {
   depends_on      = [docker_container.redpanda]
 }
 
-# Define the Materialize Docker image
+# 8. Define the Materialize Docker image
 resource "docker_image" "materialize" {
   name = "materialize/materialized:latest" # Replace with your preferred version
 }
@@ -170,4 +170,46 @@ resource "docker_container" "materialize" {
     docker_container.redpanda,
     docker_container.postgres
   ]
+}
+
+# 9. Define the Flask API Container
+resource "docker_container" "flask_api" {
+  name  = "flask-crud-api"
+  image = "python:3.11-slim" # Using a base image directly for dev
+
+  # Mount local folder to the container
+  volumes {
+    host_path      = "/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward_CDC/flask_api/wsgi" # Path to your local Python files
+    container_path = "/app"
+  }
+
+  working_dir = "/app"
+
+  # Command to start Flask with Hot-Reload enabled
+  command = ["sh", "-c", "pip install -r requirements.txt && flask run --host=0.0.0.0 --debug"]
+
+
+  env = [
+    "FLASK_APP=wsgi.py",
+    "FLASK_RUN_HOST=0.0.0.0", # Set host address here
+    "FLASK_RUN_PORT=8000", # Set port here
+    "SQLALCHEMY_DATABASE_URI=postgresql://de_user:password@postgres:5432/freightjobs"
+    "DATABASE_SCHEMA=public"
+
+    "FLASK_DEBUG=1", # Enables auto-reload when you save files in VS Code
+    "REDPANDA_BROKERS=redpanda:9092",
+    "FLASK_ENV=production"
+  ]
+
+  ports {
+    internal = 5000
+    external = 5000
+  }
+  
+  networks_advanced {
+    name = docker_network.kafka_net.name
+  }
+
+  # Ensure the API only starts after the DB is ready
+  must_run = true
 }

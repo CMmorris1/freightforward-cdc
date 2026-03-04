@@ -1,0 +1,88 @@
+</html>
+
+    <head>
+        <title>SDSP Gateway - App Registration</title>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </head>
+
+    <body>
+        <div class="content-section">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Register your application with the SDSP Gateway</legend>
+            <div class="form-group">
+                {{ form.name.label(class="form-control-label") }}
+
+                {% if form.name.errors %}
+                {{ form.name(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.name.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.name(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.version.label(class="form-control-label") }}
+
+                {% if form.version.errors %}
+                {{ form.version(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.version.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.version(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.sdsps.label(class="form-control-label") }}
+
+                {% if form.sdsps.errors %}
+                {{ form.sdsps(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.sdsps.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.sdsps(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.justification.label(class="form-control-label") }}
+
+                {% if form.justification.errors %}
+                {{ form.justification(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.justification.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {# {{ form.justification(class="form-control form-control-lg") }} #}
+                {{ form.justification(cols="35", rows="10") }}
+                {% endif %}
+            </div>
+            </fieldset>
+            <div class="form-group">
+            {{ form.submit(class="btn btn-outline-info")}}
+            </div>
+        </form>
+        </div>
+    </body>
+
+</html>

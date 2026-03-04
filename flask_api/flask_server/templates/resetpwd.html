@@ -1,0 +1,77 @@
+</html>
+
+    <head>
+        <title>SDSP Gateway - API User Reset Password</title>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        
+    </head>
+
+    <body>
+        <div class="content-section">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Reset Password</legend>
+            <div class="form-group">
+                {{ form.email.label(class="form-control-label") }}
+                
+                {{ form.email(class="form-control form-control-lg") }}
+                
+                <!-- {% if form.email.errors %}
+                {{ form.email(class="form-control form-control-lg") }}
+                <div class="invalid-feedback">
+                    {% for error in form.email.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.email(class="form-control form-control-lg") }}
+                {% endif %} -->
+            </div>
+            <div class="form-group">
+                {{ form.password.label(class="form-control-label") }}
+
+                {% if form.password.errors %}
+                {{ form.password(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.password.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.password(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.passwordConf.label(class="form-control-label") }}
+
+                {% if form.passwordConf.errors %}
+                {{ form.passwordConf(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.passwordConf.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.passwordConf(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            </fieldset>
+            <div class="form-group">
+            {{ form.submit(class="btn btn-outline-info")}}
+            </div>
+        </form>
+        <a href="{{ url_for('login') }}" ><button class=grey style="height:75px;width:150px">Cancel</button></a>
+        </div>
+    </body>
+
+</html>

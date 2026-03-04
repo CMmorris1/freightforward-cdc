@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <title>SDSP Gateway - Your Registered API Keys</title>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <style>table, tr, td{border: 1px solid black;}</style>
+    </head>
+
+    <body>
+        <div>
+            <a href="{{ url_for('adminConsole')}}">
+                <h4>Admin Console</h4>
+            </a>
+        </div>
+        {% if api_keys|length > 0 %}
+        <div>
+            <h1>Your API Keys</h1>
+            <table>
+                <tr>
+                    <th>App Name</th>
+                    <th>Version</th>
+                    <th>API Key</th>
+                    <th>Date Added</th>
+                    <th>Delete</th>
+                </tr>
+                {% for tuple in api_keys %}
+                    <tr>
+                        <td>{{ tuple[1] }}</td>
+                        <td>{{ tuple[2] }}</td>
+                        <td>{{ tuple[3] }}</td>
+                        <td>{{ tuple[4] }}</td>
+                        <td>
+                            <a href="{{ url_for('deregisterApp', appID=tuple[0]) }}" onClick="return confirm('Are you sure you want to delete this app?')">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+
+        <div>
+            <a href="{{ url_for('registerApp')}}">
+                <h4>Click here to register your app with our SDSP API</h4>
+            </a>
+        </div>
+        <br></br>
+
+        {% if perms|length > 0 %}
+        <div>
+            <h1>Your App Permissions</h1>
+            <table>
+                <tr>
+                    <th>App Name</th>
+                    <th>Version</th>
+                    <th>SDSP</th>
+                    <th>Allowed Methods</th>
+                    <th>Date Granted</th>
+                </tr>
+                {% for perm in perms %}
+                    <tr>
+                        <td>{{ perm[0] }}</td>
+                        <td>{{ perm[1] }}</td>
+                        <td>{{ perm[2] }}</td>
+                        <td>{{ perm[3] }}</td>
+                        <td>{{ perm[4] }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+        <br></br>
+
+        <form class="form-inline" method="POST" action="{{ url_for('addAppPermissions') }}">
+            <div class="form-group">
+              <div class="input-group">
+                  <!-- <span class="input-group-addon">Modify App Permissions: </span> -->
+                    <button type="submit" class="btn btn-default">Add Permissions</button>
+              </div>
+            </div>
+        </form>
+
+        {% if reqs|length > 0 %}
+        <div>
+            <h1>Your App Permission Requests</h1>
+            <table>
+                <tr>
+                    <th>App Name</th>
+                    <th>Version</th>
+                    <th>Requested SDSPs</th>
+                    <th>Status</th>
+                    <th>Decision Justification</th>
+                    <th>Acting Admin</th>
+                    <th>Date Decided</th>
+                </tr>
+                {% for req in reqs %}
+                    <tr>
+                        <td>{{ req[0].name }}</td>
+                        <td>{{ req[0].version }}</td>
+                        <td>{{ req[1].sdsps }}</td>
+                        <td>{{ req[1].status }}</td>
+                        <td>{{ req[1].decision_justification }}</td>
+                        <td>{{ req[1].acting_admin }}</td>
+                        <td>{{ req[1].date_decided }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        {% endif %}
+
+        <div>
+            <a href="{{ url_for('logout')}}">
+                <h4>Logout</h4>
+            </a>
+        </div>
+
+    </body>
+</html>

@@ -378,18 +378,21 @@ def main():
 
     # SIMULATE DATA 
 
+    # Set initial record open data
+    today = date.today()
+    job['date_opened'] =  str(today - timedelta(days=random.randint(0, 30)))
+
     while True:
 
         for client in clients:
-            today = date.today()
-
+        
             #Create a job for a new client
             job['job_id'] = str(random.randint(1000, 9999))
             job['job_number'] = "JOB-2026-" + str(random.randint(1000, 9999))
             job['client_name'] =  client
             job['origin'] = 'CNSHA'
             job['destination'] = random.choice(locations)
-            job['date_opened'] =  str(today - timedelta(days=random.randint(0, 30)))
+            job['date_opened'] =  str(job['date_opened'] - timedelta(days=random.randint(0, 30)))
 
             #Create a job history for the new client
             job_history['job_id'] = job['job_id']

@@ -1,0 +1,94 @@
+</html>
+
+    <head>
+        <title>SDSP Admin Console - Permission Approval</title>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        
+        <style>table, tr, td{border: 1px solid black;}</style>
+
+    </head>
+
+    <body>
+
+        <div>
+            <h1>Request Details</h1>
+            <table>
+
+                <tr>
+                    <td>App Name</td>
+                    <td>{{ appReq.name }}</td>
+                </tr>
+                <tr>
+                    <td>App Version</td>
+                    <td>{{ appReq.version }}</td>
+                </tr>
+                <tr>
+                    <td>App Owner</td>
+                    <td>{{ appOwner.email }}</td>
+                </tr>
+                {% set sdsps = permReq.sdsps.split(', ') %}
+                {% for sdsp in sdsps %}
+                    <tr>
+                        <td>SDSP Request</td>
+                        <td>{{ sdsp|replace("_", " ") }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td>Justification</td>
+                    <td>{{ permReq.request_justification }}</td>
+                </tr>
+            </table>
+        </div>
+        <br></br>
+        <div class="content-section">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Approve or Deny App Permission Request</legend>
+            <div class="form-group">
+                {{ form.approve.label(class="form-control-label") }}
+
+                {% if form.approve.errors %}
+                {{ form.approve(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.approve.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.approve(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.justification.label(class="form-control-label") }}
+
+                {% if form.justification.errors %}
+                {{ form.justification(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.justification.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {# {{ form.justification(class="form-control form-control-lg") }} #}
+                {{ form.justification(cols="35", rows="10") }}
+                {% endif %}
+            </div>
+            </fieldset>
+            <div class="form-group">
+            {{ form.submit(class="btn btn-outline-info")}}
+            </div>
+        </form>
+        </div>
+    </body>
+
+</html>
