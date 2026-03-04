@@ -19,12 +19,27 @@ import sys
 import json
 import time
 import psycopg2
-import global_vars
 import random
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from psycopg2.extras import execute_values
 from datetime import date, datetime, timedelta
 
+tableExists_query = 'SELECT EXISTS(SELECT * FROM information_schema.tables WHERE table_name=%s)'
+
+tableExistsinSchema_query = 'SELECT EXISTS(SELECT * FROM information_schema.tables WHERE table_schema=%s AND table_name=%s)'
+
+schemaExists_query = 'SELECT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name=%s)'
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    INFO = '\033[96m'
+    OKGREEN = '\033[32m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 def connectToPostgres_DB(dictionary):
     """ 
@@ -330,7 +345,7 @@ def main():
     }
 
     # Read database Json
-    databe_json = "FreightTables_db.json"
+    databe_json = "DBConfig.json"
 
     try:
         # Open the file and load the JSON data

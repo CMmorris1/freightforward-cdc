@@ -27,13 +27,6 @@ class API_User(db.Model):
 
 #=========================== Jobs Table =======================================================================
 
-# # Materialize
-# class Job_mv(db.Model):
-#     __tablename__ = 'freight_jobs_mv' # Name of view in Materialize
-#     __table_args__ = {'schema': 'public'} # If applicable
-
-#     data = db.Column(JSONB, primary_key=True)
-
 # PostgreSQL
 class Job(db.Model):
     __table_args__ = {"schema": "public"}

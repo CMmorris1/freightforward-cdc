@@ -9,8 +9,9 @@ import jwt
 
 talisman = Talisman(app)
 
+# check if Json contains all required table columns
 def check_missing_items(data, required_table_fields):
-    # check if Json contains all required table columns
+    
     missing = [field for field in required_table_fields if field not in data]
 
     if missing:
@@ -18,19 +19,24 @@ def check_missing_items(data, required_table_fields):
     else:
         return 0
 
-def check_items_in_table(data, required_table_fields):
-    # check if Json variables exists in table columns
-    includes = [field for field in required_table_fields if field in data]
+# =========================== JOB TABLE CRUD Routes ===================================================
 
-    if missing:
-        return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
-    else:
-        return 0
-
-
-#--- JOB CRUD ROUTES POSTGRES---
-
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # CREATE JOB
+#=============================
+#   Creates a new Job in the freightJobs database 'job' table 
+#
+# URL Inputs:
+#   * JSON Payload
+#
+# Allowed HTTP Methods: 
+#   * POST
+#
+# Returns: 
+#   * 400 - Failed
+#   * 201 - Created
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/job/create', methods=['POST'])
 def create_job():
     data = request.get_json()
@@ -58,7 +64,22 @@ def create_job():
     else:
         return check
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # READ ALL JOBS
+#=============================
+#   Reads all current Jobs from the freightJobs database 'job' table 
+#
+# URL Inputs:
+#   * None
+#
+# Allowed HTTP Methods: 
+#   * GET
+#
+# Returns: 
+#   * 400 - Failed
+#   * 200 - Success
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/jobs', methods=['GET'])
 def get_jobs_all():
     # Query the job table and build a list of dictionaries for all relavent entries
@@ -81,7 +102,22 @@ def get_jobs_all():
 
     return response
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # READ ONE JOB
+#=============================
+#   Reads one  Job from the freightJobs database 'job' table 
+#
+# URL Inputs:
+#   * job_id
+#
+# Allowed HTTP Methods: 
+#   * GET
+#
+# Returns: 
+#   * 400 - Failed
+#   * 200 - Success
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/job/<job_id>', methods=['GET'])
 def get_job(job_id):
     # Query the job table and filter specifc job id
@@ -104,7 +140,23 @@ def get_job(job_id):
 
     return response
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # UPDATE JOB
+#=============================
+#   Upadates one Job from the freightJobs database 'job' table 
+#
+# URL Inputs:
+#   * job_id
+#   * JSON Payload
+#
+# Allowed HTTP Methods: 
+#   * PUT
+#
+# Returns: 
+#   * JSON Success Message
+#   * Failure Response
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/job/update/<job_id>', methods=['PUT'])
 def update_job(job_id):
     job = Job.query.filter_by(job_id=job_id).first_or_404()
@@ -131,7 +183,30 @@ def update_job(job_id):
     return jsonify({"message": "Job updated", "job_id": job.job_id})
 
 
-# DELETE
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# DELETE JOB
+#=============================
+#   Deletes one Job from the freightJobs database 'job' table 
+#
+# URL Inputs:
+#   * job_id
+#
+# Allowed HTTP Methods: 
+#   * DELETE
+#
+# Tables Affected:
+#   * Variable: job_id
+#   * Tables:
+#       - JobHistory
+#       - Shipment
+#       - Invoice
+#       - PurchaseOrder
+#
+# Returns: 
+#   * JSON Success Message
+#   * Failure Response
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/job/delete/<job_id>', methods=['DELETE'])
 def delete_job(job_id):
     job = Job.query.filter_by(job_id=job_id).first_or_404()
@@ -140,9 +215,24 @@ def delete_job(job_id):
     return jsonify({'Result': True, 'message': 'Job Deleted'})
 
 
-#--- JOB HISTORY CRUD ROUTES POSTGRES---
+# =========================== JOB HISTORY TABLE CRUD Routes ===================================================
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # CREATE JOB HISTORY
+#=============================
+#   Creates a new Job History in the freightJobs database 'job_history' table 
+#
+# URL Inputs:
+#   * JSON Payload
+#
+# Allowed HTTP Methods: 
+#   * POST
+#
+# Returns: 
+#   * 400 - Failed
+#   * 201 - Created
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/job_history/create', methods=['POST'])
 def create_jobhistory():
     data = request.get_json()
@@ -167,7 +257,22 @@ def create_jobhistory():
     else:
         return check
 
-# READ ALL JOBS HISTORIES
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# READ ALL JOB HISTORIES
+#=============================
+#   Reads all current Job Histories from the freightJobs database 'job_history' table 
+#
+# URL Inputs:
+#   * None
+#
+# Allowed HTTP Methods: 
+#   * GET
+#
+# Returns: 
+#   * 400 - Failed
+#   * 200 - Success
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/jobs_history', methods=['GET'])
 def get_jobs_history_all():
     # Query the job_history table and build a list of dictionaries for all relavent entries
@@ -187,8 +292,22 @@ def get_jobs_history_all():
         response.status_code = 400
 
     return response
-
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # READ ONE JOB HISTORY
+#=============================
+#   Reads one Job History from the freightJobs database 'job_history' table 
+#
+# URL Inputs:
+#   * job_id
+#
+# Allowed HTTP Methods: 
+#   * GET
+#
+# Returns: 
+#   * 400 - Failed
+#   * 200 - Success
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/job_history/<job_id>', methods=['GET'])
 def get_job_history(job_id):
     # Query the job table and filter specifc job id
@@ -209,7 +328,23 @@ def get_job_history(job_id):
 
     return response
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # UPDATE JOB HISTORY
+#=============================
+#   Upadates one Job History from the freightJobs database 'job_history' table 
+#
+# URL Inputs:
+#   * job_id
+#   * JSON Payload
+#
+# Allowed HTTP Methods: 
+#   * PUT
+#
+# Returns: 
+#   * JSON Success Message
+#   * Failure Response
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/job_history/update/<job_id>', methods=['PUT'])
 def update_job_histroy(job_id):
    
@@ -230,7 +365,22 @@ def update_job_histroy(job_id):
 
     return jsonify({"message": "Job History updated", "job_id": job_histroy.job_id})
 
-# DELETE
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# DELETE JOB HISTROY
+#=============================
+#   Deletes one Job History from the freightJobs database 'job_history' table 
+#
+# URL Inputs:
+#   * job_id
+#
+# Allowed HTTP Methods: 
+#   * DELETE
+#
+# Returns: 
+#   * JSON Success Message
+#   * Failure Response
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/job_history/delete/<job_id>', methods=['DELETE'])
 def delete_jobs_history(job_id):
     job_history = JobHistory.query.filter_by(job_id=job_id).delete() # DELETES all records with filter condition
@@ -238,9 +388,25 @@ def delete_jobs_history(job_id):
     return jsonify({'Result': True, 'message': 'Job Deleted'})
 
 
-#--- SHIPMENT CRUD ROUTES POSTGRES---
 
+# =========================== SHIPMENT TABLE CRUD Routes ===================================================
+
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # CREATE SHIPMENT
+#=============================
+#   Creates a new Shipment in the freightJobs database 'shipment' table 
+#
+# URL Inputs:
+#   * JSON Payload
+#
+# Allowed HTTP Methods: 
+#   * POST
+#
+# Returns: 
+#   * 400 - Failed
+#   * 201 - Created
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/shipment/create', methods=['POST'])
 def create_shipment():
     data = request.get_json()
@@ -266,7 +432,22 @@ def create_shipment():
     else:
         return check
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # READ ALL SHIPMENTS
+#=============================
+#   Reads all Shipments from the freightJobs database 'shipment' table 
+#
+# URL Inputs:
+#   * None
+#
+# Allowed HTTP Methods: 
+#   * GET
+#
+# Returns: 
+#   * 400 - Failed
+#   * 200 - Success
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/shipments', methods=['GET'])
 def get_shipments_all():
     # Query the shipment table and build a list of dictionaries for all relavent entries
@@ -288,7 +469,22 @@ def get_shipments_all():
 
     return response
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # READ ONE SHIPMENT
+#=============================
+#   Reads one shipment from the freightJobs database 'shipment' table 
+#
+# URL Inputs:
+#   * shipment_id
+#
+# Allowed HTTP Methods: 
+#   * GET
+#
+# Returns: 
+#   * 400 - Failed
+#   * 200 - Success
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/shipment/<shipment_id>', methods=['GET'])
 def get_shipment(shipment_id):
     # Query the shipment table and filter specifc shipment id
@@ -310,7 +506,29 @@ def get_shipment(shipment_id):
 
     return response
 
+
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # UPDATE SHIPMENT
+#=============================
+#   Upadates one Shipment from the freightJobs database 'shipment' table 
+#
+# URL Inputs:
+#   * job_id
+#   * JSON Payload
+#
+# Allowed HTTP Methods: 
+#   * PUT
+#
+# Tables Affected:
+#   * Variable: shipment_id
+#   * Tables:
+#       - Freight
+#
+# Returns: 
+#   * JSON Success Message
+#   * Failure Response
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/shipment/update/<job_id>', methods=['PUT'])
 def update_shipment(job_id):
    
@@ -331,7 +549,22 @@ def update_shipment(job_id):
 
     return jsonify({"message": "Shipment updated", "job_id": shipment.job_id})
 
-# DELETE
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# DELETE SHIPMENT
+#=============================
+#   Deletes one Shipment from the freightJobs database 'shipment' table 
+#
+# URL Inputs:
+#   * job_id
+#
+# Allowed HTTP Methods: 
+#   * DELETE
+#
+# Returns: 
+#   * JSON Success Message
+#   * Failure Response
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/shipment/delete/<job_id>', methods=['DELETE'])
 def delete_shipment(job_id):
     shipment = Shipment.query.filter_by(job_id=job_id).first_or_404()
@@ -340,9 +573,24 @@ def delete_shipment(job_id):
     return jsonify({'Result': True, 'message': 'Shipment Deleted'})
 
 
-#--- FREIGHT CRUD ROUTES POSTGRES---
+# =========================== FREIGHT TABLE CRUD Routes ===================================================
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # CREATE FREIGHT
+#=============================
+#   Creates a new Freight in the freightJobs database 'freight' table 
+#
+# URL Inputs:
+#   * JSON Payload
+#
+# Allowed HTTP Methods: 
+#   * POST
+#
+# Returns: 
+#   * 400 - Failed
+#   * 201 - Created
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/freight/create', methods=['POST'])
 def create_freight():
     data = request.get_json()
@@ -370,7 +618,22 @@ def create_freight():
     else:
         return check
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # READ ALL FREIGHTS
+#=============================
+#   Reads all Freights from the freightJobs database 'freight' table 
+#
+# URL Inputs:
+#   * None
+#
+# Allowed HTTP Methods: 
+#   * GET
+#
+# Returns: 
+#   * 400 - Failed
+#   * 200 - Success
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/freights', methods=['GET'])
 def get_freights_all():
     # Query the freight table and build a list of dictionaries for all relavent entries
@@ -393,7 +656,22 @@ def get_freights_all():
 
     return response
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # READ ONE FREIGHT
+#=============================
+#   Reads one Freight from the freightJobs database 'freight' table 
+#
+# URL Inputs:
+#   * freight_id
+#
+# Allowed HTTP Methods: 
+#   * GET
+#
+# Returns: 
+#   * 400 - Failed
+#   * 200 - Success
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/freight/<freight_id>', methods=['GET'])
 def get_freight(freight_id):
     # Query the freight table and filter specifc shipment id
@@ -416,7 +694,23 @@ def get_freight(freight_id):
 
     return response
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # UPDATE FREIGHT
+#=============================
+#   Upadates one Freight from the freightJobs database 'freight' table 
+#
+# URL Inputs:
+#   * job_id
+#   * JSON Payload
+#
+# Allowed HTTP Methods: 
+#   * PUT
+#
+# Returns: 
+#   * JSON Success Message
+#   * Failure Response
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/freight/update/<freight_id>', methods=['PUT'])
 def update_freight(freight_id):
    
@@ -441,7 +735,22 @@ def update_freight(freight_id):
 
     return jsonify({"message": "Freight updated", "freight_id": freight.freight_id})
 
-# DELETE
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# DELETE FREIGHT
+#=============================
+#   Deletes one Freight from the freightJobs database 'freight' table 
+#
+# URL Inputs:
+#   * freight_id
+#
+# Allowed HTTP Methods: 
+#   * DELETE
+#
+# Returns: 
+#   * JSON Success Message
+#   * Failure Response
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/freight/delete/<freight_id>', methods=['DELETE'])
 def delete_freight(freight_id):
     freight = Freight.query.filter_by(freight_id=freight_id).first_or_404()
@@ -450,9 +759,24 @@ def delete_freight(freight_id):
     return jsonify({'Result': True, 'message': 'Freight Deleted'})
 
 
-#--- INVOICE CRUD ROUTES POSTGRES---
+# =========================== INVOICE TABLE CRUD Routes ===================================================
 
-# CREATE FREIGHT
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# CREATE INVOICE
+#=============================
+#   Creates a new Invoice in the freightJobs database 'invoice' table 
+#
+# URL Inputs:
+#   * JSON Payload
+#
+# Allowed HTTP Methods: 
+#   * POST
+#
+# Returns: 
+#   * 400 - Failed
+#   * 201 - Created
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/invoice/create', methods=['POST'])
 def create_invoice():
     data = request.get_json()
@@ -480,7 +804,22 @@ def create_invoice():
     else:
         return check
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # READ ALL INVOICES
+#=============================
+#   Reads all Invoices from the freightJobs database 'invocie' table 
+#
+# URL Inputs:
+#   * None
+#
+# Allowed HTTP Methods: 
+#   * GET
+#
+# Returns: 
+#   * 400 - Failed
+#   * 200 - Success
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/invoices', methods=['GET'])
 def get_invoices_all():
     # Query the freight table and build a list of dictionaries for all relavent entries
@@ -503,7 +842,22 @@ def get_invoices_all():
 
     return response
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # READ ONE INVOICE
+#=============================
+#   Reads one Invoice from the freightJobs database 'invoice' table 
+#
+# URL Inputs:
+#   * invoice_id
+#
+# Allowed HTTP Methods: 
+#   * GET
+#
+# Returns: 
+#   * 400 - Failed
+#   * 200 - Success
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/invoice/<invoice_id>', methods=['GET'])
 def get_invoice(invoice_id):
     # Query the freight table and filter specifc shipment id
@@ -526,7 +880,23 @@ def get_invoice(invoice_id):
 
     return response
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # UPDATE INVOICE
+#=============================
+#   Upadates one Invoice from the freightJobs database 'invoice' table 
+#
+# URL Inputs:
+#   * job_id
+#   * JSON Payload
+#
+# Allowed HTTP Methods: 
+#   * PUT
+#
+# Returns: 
+#   * JSON Success Message
+#   * Failure Response
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/invoice/update/<job_id>', methods=['PUT'])
 def update_invoice(job_id):
    
@@ -552,7 +922,22 @@ def update_invoice(job_id):
     return jsonify({"message": "Invoice updated", "job_id": invoice.job_id})
 
 
-# DELETE
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# DELETE INVOICE
+#=============================
+#   Deletes one Invoice from the freightJobs database 'invoice' table 
+#
+# URL Inputs:
+#   * invoice_id
+#
+# Allowed HTTP Methods: 
+#   * DELETE
+#
+# Returns: 
+#   * JSON Success Message
+#   * Failure Response
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/invoice/delete/<invoice_id>', methods=['DELETE'])
 def delete_invoice(invoice_id):
     invoice = Invoice.query.filter_by(invoice_id=invoice_id).first_or_404()
@@ -561,9 +946,24 @@ def delete_invoice(invoice_id):
     return jsonify({'Result': True, 'message': 'Invoice Deleted'})
 
 
-#--- PURCHASE ORDER CRUD ROUTES POSTGRES---
+# =========================== PURCHASE ORDER TABLE CRUD Routes ===================================================
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # CREATE PURCHASE ORDER
+#=============================
+#   Creates a new Purchase Order in the freightJobs database 'purchaseorder' table 
+#
+# URL Inputs:
+#   * JSON Payload
+#
+# Allowed HTTP Methods: 
+#   * POST
+#
+# Returns: 
+#   * 400 - Failed
+#   * 201 - Created
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/purchaseorder/create', methods=['POST'])
 def create_purchaseorder():
     data = request.get_json()
@@ -590,7 +990,23 @@ def create_purchaseorder():
     else:
         return check
 
+
+#------------------------------------------------------------------------------------------------------------------------------------------------
 # READ ALL PURCHASE ORDERS
+#=============================
+#   Reads all Purchase Orders from the freightJobs database 'purchaseorder' table 
+#
+# URL Inputs:
+#   * None
+#
+# Allowed HTTP Methods: 
+#   * GET
+#
+# Returns: 
+#   * 400 - Failed
+#   * 200 - Success
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/purchaseorders', methods=['GET'])
 def get_purchaseorders_all():
     # Query the purchase order table and build a list of dictionaries for all relavent entries
@@ -613,7 +1029,22 @@ def get_purchaseorders_all():
     return response
 
 
-# READ ONE PURCHASE ORDER
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# READ ONE PURCHASE ORDERS
+#=============================
+#   Reads one Purchase Order from the freightJobs database 'purchaseorder' table 
+#
+# URL Inputs:
+#   * job_id
+#
+# Allowed HTTP Methods: 
+#   * GET
+#
+# Returns: 
+#   * 400 - Failed
+#   * 200 - Success
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/purchaseorder/<job_id>', methods=['GET'])
 def get_purchaseorder(job_id):
     # Query the freight table and filter specifc shipment id
@@ -635,7 +1066,23 @@ def get_purchaseorder(job_id):
 
     return response
 
-# UPDATE INVOICE
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# UPDATE PURCHASE ORDER
+#=============================
+#   Upadates one Purchase Order from the freightJobs database 'purchaseorder' table 
+#
+# URL Inputs:
+#   * job_id
+#   * JSON Payload
+#
+# Allowed HTTP Methods: 
+#   * PUT
+#
+# Returns: 
+#   * JSON Success Message
+#   * Failure Response
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/purchaseorder/update/<job_id>', methods=['PUT'])
 def update_purchaseorder(job_id):
    
@@ -658,7 +1105,22 @@ def update_purchaseorder(job_id):
 
     return jsonify({"message": "Purchase Order updated", "job_id": purchaseorder.job_id})
 
-# DELETE
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# DELETE PURCHASE ORDER
+#=============================
+#   Deletes one Purchase Order from the freightJobs database 'purchaseorder' table 
+#
+# URL Inputs:
+#   * invoice_id
+#
+# Allowed HTTP Methods: 
+#   * DELETE
+#
+# Returns: 
+#   * JSON Success Message
+#   * Failure Response
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
 @app.route('/purchaseorder/delete/<job_id>', methods=['DELETE'])
 def delete_purchaseorder(job_id):
     purchaseorder = PurchaseOrder.query.filter_by(job_id=job_id).first_or_404()
