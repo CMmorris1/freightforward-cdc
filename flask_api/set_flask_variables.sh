@@ -9,7 +9,7 @@ export FLASK_APP="wsgi.py"
 export FLASK_RUN_HOST="0.0.0.0"
 
 # Set port here
-export FLASK_RUN_PORT="8000"
+export FLASK_RUN_PORT="5000"
 
 # Set URI to postgres database here
 export SQLALCHEMY_DATABASE_URI="postgresql://de_user:de_password@localhost:5433/freightjobs"
@@ -26,3 +26,5 @@ export VERIFY_USER=1 # 1 for true, 0 for false
 
 # Set debug option here. Use '1' for debug mode, '0' for production mode
 export FLASK_DEBUG=1
+
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES

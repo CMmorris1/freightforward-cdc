@@ -67,12 +67,12 @@ def connectToPostgres_DB(dictionary):
         connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
     except psycopg2.OperationalError as e:
-        print (global_vars.bcolors.FAIL + "CONNECTION ERROR: Could not connect to postgres server. Caught Exception: \n" + global_vars.bcolors.ENDC)
+        print (bcolors.FAIL + "CONNECTION ERROR: Could not connect to postgres server. Caught Exception: \n" + bcolors.ENDC)
         print (e)
         exit()
 
     # Display if the connection was successful
-    print(global_vars.bcolors.OKGREEN + "SUCCESS: Postgres Database Connection Successful. %s" % (global_vars.bcolors.ENDC))
+    print(bcolors.OKGREEN + "SUCCESS: Postgres Database Connection Successful. %s" % (bcolors.ENDC))
 
     cursor = connection.cursor()
 
@@ -100,10 +100,10 @@ def check_and_create_DB(cursor, connection, database):
     dbExists = cursor.fetchone()[0]                
     
     if not dbExists:
-        print(global_vars.bcolors.INFO + "INFO: %s does not exist. Generating database... %s" % (database, global_vars.bcolors.INFO))
+        print(bcolors.INFO + "INFO: %s does not exist. Generating database... %s" % (database, bcolors.INFO))
         create_statement = 'CREATE DATABASE ' + database + ';'
         cursor.execute(create_statement)
-        print(global_vars.bcolors.OKGREEN + "SUCCESS: 'created database %s. Connecting to new database... %s" % (database, global_vars.bcolors.ENDC))
+        print(bcolors.OKGREEN + "SUCCESS: 'created database %s. Connecting to new database... %s" % (database, bcolors.ENDC))
     
 
 def connectTo_DB(dictionary):
@@ -130,14 +130,14 @@ def connectTo_DB(dictionary):
         connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
     except psycopg2.OperationalError as e:
-        print (global_vars.bcolors.FAIL + "CONNECTION ERROR: Could not connect to postgres server. Caught Exception: \n" + global_vars.bcolors.ENDC)
+        print (bcolors.FAIL + "CONNECTION ERROR: Could not connect to postgres server. Caught Exception: \n" + bcolors.ENDC)
         print (e)
         exit()
     
     cursor = connection.cursor()
 
     # Display if the connection was successful
-    # print(global_vars.bcolors.OKGREEN + "SUCCESS: %s Database Connection Successful.\n %s" % (db_name, global_vars.bcolors.ENDC))
+    # print(bcolors.OKGREEN + "SUCCESS: %s Database Connection Successful.\n %s" % (db_name, bcolors.ENDC))
 
     return cursor, connection
 
@@ -156,7 +156,7 @@ def check_and_build_tables_dynamically(cursor, connection, tablename, createTabl
 
     """
 
-    query = global_vars.tableExists_query
+    query = tableExists_query
 
     # query for table name
     cursor.execute(query, [tablename])
@@ -164,16 +164,16 @@ def check_and_build_tables_dynamically(cursor, connection, tablename, createTabl
     check = cursor.fetchone()[0]
 
     if not check:
-        print(global_vars.bcolors.WARNING + "WARNING: " + str(tablename) + " table does not exist. Creating table..." + global_vars.bcolors.ENDC)
+        print(bcolors.WARNING + "WARNING: " + str(tablename) + " table does not exist. Creating table..." + bcolors.ENDC)
         
         try:
             cursor.execute(createTable)
-            print (global_vars.bcolors.OKGREEN + "SUCCESS: " + str(tablename) + " Table created successfully\n" + global_vars.bcolors.ENDC)
+            print (bcolors.OKGREEN + "SUCCESS: " + str(tablename) + " Table created successfully\n" + bcolors.ENDC)
             connection.commit()
         except psycopg2.Error as e:
             print(f"Error creating table in function check_and_build_tables_dynamically: {e}")
     else:
-        print(global_vars.bcolors.OKGREEN + "SUCCESS: " + str(tablename) + " table was found.\n" + global_vars.bcolors.ENDC)
+        print(bcolors.OKGREEN + "SUCCESS: " + str(tablename) + " table was found.\n" + bcolors.ENDC)
 
 
 def create_insert_statement(fields, table_name):
@@ -407,7 +407,7 @@ def main():
             job['client_name'] =  client
             job['origin'] = 'CNSHA'
             job['destination'] = random.choice(locations)
-            job['date_opened'] =  str(job['date_opened'] - timedelta(days=random.randint(0, 30)))
+            job['date_opened'] =  str(datetime.strptime(str(job['date_opened']), "%Y-%m-%d").date() - timedelta(days=random.randint(0, 30)))
 
             #Create a job history for the new client
             job_history['job_id'] = job['job_id']

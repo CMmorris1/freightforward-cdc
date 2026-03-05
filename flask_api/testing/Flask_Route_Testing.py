@@ -7,6 +7,7 @@ number = 1
 # -------- CREATE ROUTES ------- #
 
 # JOB
+url = 'http://127.0.0.1:5000/jobs'
 # url = 'http://127.0.0.1:8000/job/create'
 
 # job_payload = {
@@ -154,8 +155,9 @@ number = 1
 try:
     # Send the POST request with the JSON payload
     # response = requests.post(url, json=job_payload) # For CREATE
+    response = requests.get(url) # For READ
     # response = requests.put(url, json=job_payload) # For UPDATE
-    response = requests.delete(url) # For DELETE
+    # response = requests.delete(url) # For DELETE
 
     # Raise an exception for bad status codes (4xx or 5xx)
     response.raise_for_status()

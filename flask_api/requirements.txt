@@ -6,3 +6,5 @@ flask-talisman
 PyJWT
 WTForms
 psycopg2-binary
+gunicorn
+requests

@@ -31,7 +31,11 @@ resource "docker_container" "redpanda" {
     "--kafka-addr", "internal://0.0.0.0:9092,external://0.0.0.0:19092", 
     "--advertise-kafka-addr", "internal://redpanda:9092,external://127.0.0.1:19092", 
     "--smp", "1", "--memory", "1G", "--reserve-memory", "0M", "--node-id", "0", "--check=false"]
-  networks_advanced { name = docker_network.kafka_net.name }
+
+  networks_advanced { 
+    name = docker_network.kafka_net.name 
+  }
+
     ports { 
     internal = 19092 
     external = 19092 
@@ -49,7 +53,11 @@ resource "docker_container" "postgres" {
   image   = "postgres:17"
   command = ["postgres", "-c", "wal_level=logical"]
   env     = ["POSTGRES_USER=de_user", "POSTGRES_PASSWORD=de_password", "POSTGRES_DB=freightjobs"]
-  networks_advanced { name = docker_network.kafka_net.name }
+  
+  networks_advanced { 
+    name = docker_network.kafka_net.name 
+  }
+
   ports { 
     internal = 5432
     external = 5433
@@ -74,7 +82,11 @@ resource "docker_container" "debezium" {
     retries  = 20
     timeout  = "5s"
   }
-  networks_advanced { name = docker_network.kafka_net.name }
+
+  networks_advanced { 
+    name = docker_network.kafka_net.name 
+  }
+
   ports { 
     internal = 8083 
     external = 8083 
@@ -92,7 +104,11 @@ resource "docker_container" "console" {
     "KAFKA_CONNECT_CLUSTERS_0_NAME=debezium",
     "KAFKA_CONNECT_CLUSTERS_0_URL=http://connect:8083"
   ]
-  networks_advanced { name = docker_network.kafka_net.name }
+
+  networks_advanced { 
+    name = docker_network.kafka_net.name 
+  }
+
   ports { 
     internal = 8080
     external = 8080 
@@ -170,4 +186,49 @@ resource "docker_container" "materialize" {
     docker_container.redpanda,
     docker_container.postgres
   ]
+}
+
+# 9. Define the Flask API Container
+resource "docker_image" "flask_image" {
+  name = "flask-api-image"
+  build {
+    # Path from your main.tf to the flask_api folder
+    context = "/Users/ChrisProjects/Documents/Learning/Data_Engineering/FreightForward_CDC/flask_api" 
+    dockerfile = "flask_api.dockerfile" 
+  }
+}
+
+resource "docker_container" "flask_api" {
+  name  = "flask-crud-api"
+  image = docker_image.flask_image.image_id
+
+
+  networks_advanced {
+    name = docker_network.kafka_net.name
+  }
+
+  ports {
+    internal = 5000
+    external = 5000
+  }
+  
+  env = [
+    "FLASK_APP=wsgi.py",
+    "FLASK_RUN_HOST=0.0.0.0", # Set host address here
+    "FLASK_RUN_PORT=5000", # Set port here
+    "SQLALCHEMY_DATABASE_URI=postgresql://de_user:de_password@postgres:5432/freightjobs",
+    "DATABASE_SCHEMA=public",
+    "HTTPS_ENABLED=0",
+    "VERIFY_USER=1",
+    "FLASK_DEBUG=1",
+    "REDPANDA_BROKERS=redpanda:9092",
+    "OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES"
+  ]
+
+  # Ensure the API only starts after the DB is ready
+  must_run = true
+}
+
+output "flask_api_url" {
+  value = "http://localhost:${docker_container.flask.ports[0].external}"
 }
