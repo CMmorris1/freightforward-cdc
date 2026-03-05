@@ -1,7 +1,10 @@
 """
 Date: February 2026
 
-Description: Postgres main to launch driver function for uploading data to database
+Description: 
+    Simulates Job, Job History, Shipment, Invoice, and Purchase Order data and writes the data 
+    to respective PostgreSQL database tables in the "freightjobs" database. Currently the generation time is set to 3 seconds. 
+    If this tme is not optimal, it can be manipulated to the desired rate by changing the variable "simTime_Seconds" in the Main function. 
 
 Author: Christopher M. Morris
 
@@ -136,9 +139,6 @@ def connectTo_DB(dictionary):
     
     cursor = connection.cursor()
 
-    # Display if the connection was successful
-    # print(bcolors.OKGREEN + "SUCCESS: %s Database Connection Successful.\n %s" % (db_name, bcolors.ENDC))
-
     return cursor, connection
 
 
@@ -176,28 +176,29 @@ def check_and_build_tables_dynamically(cursor, connection, tablename, createTabl
         print(bcolors.OKGREEN + "SUCCESS: " + str(tablename) + " table was found.\n" + bcolors.ENDC)
 
 
-def create_insert_statement(fields, table_name):
+def create_INSERT_statement(item_Dict, table_name):
     """
     This function creates the INSERT statment
 
     Parameters:
-        fields: Table column names
+        item_Dict: Table information dictionary
         table_name: The database table of interest
 
     Returns: INSERT Statement
     """
-    # create the correct amount of %s placeholders
-    field_placeholders = ['%s'] * len(fields)
+    # Capture item_Dict Fields and Values
+    initValues_Fields = list(item_Dict.keys())
 
-    fieldslistToStr = ', '.join([str(elem) for elem in fields]) 
+    # create the correct amount of %s placeholders
+    field_placeholders = ['%s'] * len(initValues_Fields)
+
+    fieldslistToStr = ', '.join([str(elem) for elem in initValues_Fields]) 
 
     # combine table_name with fileds and placeholders
-    fmt_args = (table_name, ','.join(fields), ','.join(field_placeholders))
+    fmt_args = (table_name, ','.join(initValues_Fields), ','.join(field_placeholders))
 
     statement = "INSERT INTO %s (%s) VALUES (%s) ON CONFLICT DO NOTHING;" % fmt_args
 
-    # cursor.execute("INSERT INTO %s (%s) VALUES (%s) ON CONFLICT DO NOTHING" % fmt_args, insert_args)
-    
     return statement
 
 
@@ -222,16 +223,15 @@ def insert_to_tables(
         freight_data: Updated freight row
         invoice_data: Updated invoice row
         purchaseorder_data: Updated purchaseorder row
-        cursor: PostgreSQL database cursor 
-        connection: PostgreSQL database connection
+        cursor: PostgreSQL database cursor for the "freightjobs" database
+        connection: PostgreSQL database connection for the "freightjobs" database
 
     Returns: True if successful, False is failed
     """
     cursor, connection = connectTo_DB(database_info)
 
     try:
-        # cursor.execute(statement, records)
-        # connection.commit()
+ 
         with connection:
             with cursor as cur:
                 # all INSERTS are posrt of one transaction
@@ -248,20 +248,10 @@ def insert_to_tables(
         return False
     finally:
         connection.close()
-
-
-def create_INSERT_statement(item_Dict, itemName):
-
-    # Capture item_Dict Fields and Values
-    initValues_Fields = list(item_Dict.keys())
-
-    insert_statement = create_insert_statement(initValues_Fields, itemName)
-
-    return insert_statement
-
+        
 
 def main():
-
+    simTime_Seconds = 3
     today = date.today()
     numberofjob = 0
     numberofshipment = 1
@@ -554,7 +544,7 @@ def main():
                     db_name_cursor, 
                     db_name_connection)
 
-                time.sleep(3)
+                time.sleep(simTime_Seconds)
 
 if __name__ == '__main__':
     main()

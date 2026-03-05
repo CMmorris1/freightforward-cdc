@@ -1,4 +1,4 @@
-# Real-Time Freight Forwarding Analytics Pipeline
+# Real-Time Freight Forwarding CDC Pipeline
 
 A Data Engineering project bridging Software Engineering principles (Python) with modern Data Analytics (PostgreSQL, Redpanda, Debezium, Materialize, Flask API).
 
@@ -10,6 +10,34 @@ A Data Engineering project bridging Software Engineering principles (Python) wit
 - **(Materialize):** Streaming database designed to consume Change Data Capture (CDC) logs from Debezium
 - **(Flask API):** Lightweight and flexible web server for RESTful API with CRUD actions
 
+## Project Directory Structure
+```text
+├── README.md
+├── .gitignore
+├── requirements.txt (Needed Project Libraries)
+├── Makefile (Commands to make Terraform Containers)
+├── flask_api
+│   ├── flask_server
+│   │   ├── models (Flask API Database Table Models)
+│   │   ├──routes (Flask API CRUD Routes)
+│   |   └── __init__.py (Flask App Configurations)
+|   ├── logs (Location for Flask Access/Error log files)
+|   ├── testing (API Routes Test Script)
+|   ├── flask_api.dockerfile (File Used by Terraform to create Flask Web Server)
+|   ├── README.md
+|   ├── requirements.txt (Needed Flask API Libraries)
+|   └──wsgi.py (Flask Web Server Application)
+├── infra (Terraform Directory)
+|   ├── backend.tf
+|   ├── main.tf
+|   └── init_materialize.sql (SQL file to create materialize sources, views, and sinks)
+├── producer
+│   ├── testing
+│   │   └──consumeRedpandaTopics.py (Script to read Repanda materialize view topics)
+│   ├── DBConfig.json (Database configuration file for freightjobs DB creation)
+│   └── simulateFreight.py (Python job simulation stream producer)
+
+```
 ## 🛠️ Quick Start
 For visability it is advised to run each command in a seperate terminal
 
@@ -36,12 +64,10 @@ Or
 1. `cd infra && terraform apply`
 2. `cd producer && source .venv/bin/activate && python3 simulateFreight.py`
 4. `cd infra && psql -U materialize -h localhost -p 6875 -d materialize -f init_materialize.sql`
-
-## To consume the Respanda topics. This file is currently configured to read the freight_jobs topic
-## it can be modified by uncommenting other topics and replacing the desired topic in line 32
 5. `cd producer && python3 consumeRedpandaTopics.py` 
+6. `Run Flask API` (For Flask API setup, plese see ./flask_api/README.md for detailed instructions)
 
-## For Flask API setup, plese see ./flask_api/README.md for detailed instructions
-6. Run Flask API 
+To consume the Respanda topics. This file is currently configured to read the freight_jobs topic
+but can be modified to red the others.
 
 

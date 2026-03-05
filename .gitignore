@@ -8,3 +8,5 @@ spark/checkpoints/
 Explaination.txt
 output.txt
 Dockerhelp.txt.rtf
+dbt_ci.yml
+launch_flask_API.sh
