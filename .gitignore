@@ -4,6 +4,7 @@ __pycache__/
 *.pyc
 .terraform/
 terraform.tfstate*
+backend.tf
 spark/checkpoints/
 Explaination.txt
 output.txt
